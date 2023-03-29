@@ -1,0 +1,25 @@
+{
+    "include": ["src/**/*", "node_modules/webpack/module.d.ts"],
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "es2020",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "declaration": true,
+        "lib": ["ESNext", "es2020"],
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "strictBindCallApply": true,
+        "alwaysStrict": true,
+        "strictPropertyInitialization": true,
+        "outDir": "./dist",
+        "downlevelIteration": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true
+    },
+    "exclude": ["node_modules", "dist"]
+}

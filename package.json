@@ -1,0 +1,50 @@
+{
+    "name": "java-ts-definition-generator",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.prod.min.js",
+    "types": "dist/src/index.d.ts",
+    "scripts": {
+        "test": "mocha -r ts-node/register test/*.test.ts --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+        "build": "webpack build",
+        "format": "prettier --write ."
+    },
+    "keywords": [],
+    "author": "MarkusJx",
+    "license": "MIT",
+    "bin": {
+        "java-ts-gen": "./dist/java-ts-gen.js"
+    },
+    "dependencies": {
+        "java-bridge": "^2.2.3",
+        "ora": "^6.3.0",
+        "typescript": "^5.0.2",
+        "yargs": "^17.7.1"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.4",
+        "@types/is-ci": "^3.0.0",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^18.15.11",
+        "@types/webpack-node-externals": "^3.0.0",
+        "@types/yargs": "^17.0.24",
+        "chai": "^4.3.7",
+        "is-ci": "^3.0.1",
+        "mocha": "^10.2.0",
+        "mocha-junit-reporter": "^2.2.0",
+        "mocha-multi-reporters": "^1.5.1",
+        "prettier": "^2.8.7",
+        "ts-loader": "^9.4.2",
+        "ts-node": "^10.9.1",
+        "webpack": "^5.76.3",
+        "webpack-cli": "^5.0.1",
+        "webpack-node-externals": "^3.0.0"
+    },
+    "prettier": {
+        "printWidth": 80,
+        "semi": true,
+        "singleQuote": true,
+        "tabWidth": 4,
+        "trailingComma": "es5"
+    }
+}
