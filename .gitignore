@@ -1,2 +1,4 @@
 # Project exclude paths
 /dist/
+node_modules/
+testResults.xml

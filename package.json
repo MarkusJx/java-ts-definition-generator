@@ -12,6 +12,9 @@
     "keywords": [],
     "author": "MarkusJx",
     "license": "MIT",
+    "files": [
+        "dist/**/*"
+    ],
     "bin": {
         "java-ts-gen": "./dist/java-ts-gen.js"
     },
