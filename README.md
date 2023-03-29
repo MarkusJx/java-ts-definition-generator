@@ -1,6 +1,6 @@
 # Java typescript definition generator
 
-This is the typescript definition generator for the [`java-bridge`]() package.
+This is the typescript definition generator for the [`java-bridge`](https://github.com/MarkusJx/node-java-bridge) package.
 It generates typescript definitions for java classes and interfaces.
 
 It can either be invoked from the command line or used as a library.
