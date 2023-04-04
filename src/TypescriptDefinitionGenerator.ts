@@ -1118,3 +1118,5 @@ export default class TypescriptDefinitionGenerator {
         }
     }
 }
+
+export { TypescriptDefinitionGenerator };

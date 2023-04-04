@@ -7,8 +7,10 @@ It can either be invoked from the command line or used as a library.
 
 ## Installation
 
+_Note: You need to install `java-bridge` separately_
+
 ```bash
-npm install -g java-ts-definition-generator
+npm install -g java-ts-definition-generator java-bridge
 ```
 
 ## Command line usage
@@ -72,7 +74,7 @@ java-ts-gen ./project java.lang.String java.util.ArrayList
 ## Library usage
 
 ```ts
-import { TypescriptDefinitionGenerator } from 'java-bridge';
+import { TypescriptDefinitionGenerator } from 'java-ts-definition-generator';
 
 const generator = new TypescriptDefinitionGenerator('java.lang.String');
 // Generate the typescript definitions
