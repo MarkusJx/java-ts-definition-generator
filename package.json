@@ -19,7 +19,6 @@
         "java-ts-gen": "./dist/java-ts-gen.js"
     },
     "dependencies": {
-        "java-bridge": "^2.2.3",
         "ora": "^6.3.0",
         "typescript": "^5.0.2",
         "yargs": "^17.7.1"
@@ -33,6 +32,7 @@
         "@types/yargs": "^17.0.24",
         "chai": "^4.3.7",
         "is-ci": "^3.0.1",
+        "java-bridge": "^2.3.0",
         "mocha": "^10.2.0",
         "mocha-junit-reporter": "^2.2.0",
         "mocha-multi-reporters": "^1.5.1",
