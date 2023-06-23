@@ -1,13 +1,10 @@
 import yargs from 'yargs';
 import { performance } from 'perf_hooks';
 import path from 'path';
-import java, {
-    ensureJvm,
-    getJavaInstance,
-    TypescriptDefinitionGenerator,
-} from 'java-bridge';
+import java, { ensureJvm, getJavaInstance } from 'java-bridge';
 import { version } from '../package.json';
 import type { Ora } from 'ora';
+import TypescriptDefinitionGenerator from './TypescriptDefinitionGenerator';
 
 interface Args {
     classnames: string[];

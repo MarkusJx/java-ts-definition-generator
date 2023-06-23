@@ -2,30 +2,30 @@ import path from 'path';
 import { BannerPlugin } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 
-interface AdditionalOptions {
-    banner?: string;
-}
-
-const config = (
-    entry: string,
-    mode: string,
-    outName: string,
-    opts?: AdditionalOptions
-) => ({
-    entry,
+module.exports = {
+    entry: {
+        index: {
+            import: './src/index.ts',
+            filename: 'index.prod.min.js',
+            library: {
+                name: 'java-ts-definition-generator',
+                type: 'umd',
+            },
+        },
+        cli: {
+            dependOn: 'index',
+            import: './src/cli.ts',
+            filename: 'java-ts-gen.js',
+        },
+    },
     target: 'node',
-    mode,
+    mode: 'production',
     externalsPresets: {
         node: true,
     },
     externals: [nodeExternals()],
     output: {
         path: path.join(__dirname, 'dist'),
-        filename: outName,
-        library: {
-            name: 'java',
-            type: 'umd',
-        },
     },
     node: {
         __dirname: false,
@@ -51,17 +51,10 @@ const config = (
     },
     devtool: 'source-map',
     plugins: [
-        opts?.banner &&
-            new BannerPlugin({
-                banner: opts?.banner,
-                raw: true,
-            }),
-    ].filter((v) => !!v),
-});
-
-module.exports = [
-    config('./src/index.ts', 'production', 'index.prod.min.js'),
-    config('./src/cli.ts', 'production', 'java-ts-gen.js', {
-        banner: '#!/usr/bin/env node',
-    }),
-];
+        new BannerPlugin({
+            banner: '#!/usr/bin/env node',
+            raw: true,
+            include: 'java-ts-gen.js',
+        }),
+    ],
+};
