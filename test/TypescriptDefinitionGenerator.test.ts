@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import ts from 'typescript';
 import path from 'path';
 import * as fs from 'fs';
-import { forceRunAllTests, shouldIncreaseTimeout } from './testUtil';
+import { forceRunAllTests, runCli, shouldIncreaseTimeout } from './testUtil';
 import isCi from 'is-ci';
 
 interface Diagnostics {
@@ -134,4 +134,13 @@ describe('TypescriptDefinitionGenerator test', () => {
             `
         );
     }).timeout(timeoutMs * 4);
+});
+
+describe('CLI Test', () => {
+    it('Check CLI', async () => {
+        const { out, exitCode } = await runCli();
+
+        expect(exitCode).to.be.equal(1);
+        expect(out).to.contain('java-ts-gen.js <output> <classnames..>');
+    });
 });

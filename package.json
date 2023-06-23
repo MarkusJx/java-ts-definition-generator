@@ -19,9 +19,10 @@
         "java-ts-gen": "./dist/java-ts-gen.js"
     },
     "dependencies": {
-        "ora": "^6.3.0",
-        "typescript": "^5.0.2",
-        "yargs": "^17.7.1"
+        "chalk": "^5.2.0",
+        "ora": "^6.3.1",
+        "typescript": "^5.1.3",
+        "yargs": "^17.7.2"
     },
     "devDependencies": {
         "@types/chai": "^4.3.5",

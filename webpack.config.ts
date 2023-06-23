@@ -13,12 +13,11 @@ module.exports = {
             },
         },
         cli: {
-            dependOn: 'index',
             import: './src/cli.ts',
             filename: 'java-ts-gen.js',
         },
     },
-    target: 'node',
+    target: 'node16',
     mode: 'production',
     externalsPresets: {
         node: true,
@@ -26,6 +25,7 @@ module.exports = {
     externals: [nodeExternals()],
     output: {
         path: path.join(__dirname, 'dist'),
+        clean: true,
     },
     node: {
         __dirname: false,
@@ -57,4 +57,9 @@ module.exports = {
             include: 'java-ts-gen.js',
         }),
     ],
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        },
+    },
 };
