@@ -103,6 +103,33 @@ const nonNullReturnMethods: string[] = [
     'equals',
 ];
 
+export interface GeneratorOpts {
+    asyncSuffix?: string;
+    syncSuffix?: string;
+    customInspect?: boolean;
+}
+
+const defaultGeneratorOpts: Required<GeneratorOpts> = {
+    asyncSuffix: '',
+    syncSuffix: 'Sync',
+    customInspect: false,
+};
+
+const deepEquals = <T extends {}>(a: T, b: T): boolean => {
+    return (Object.keys(a) as (keyof T)[]).every((key) => {
+        if (
+            typeof a[key] === 'object' &&
+            !!a[key] &&
+            typeof b[key] === 'object' &&
+            !!b[key]
+        ) {
+            return deepEquals(a[key], b[key]);
+        } else {
+            return a[key] === b[key];
+        }
+    });
+};
+
 /**
  * A class to generate typescript definitions for java classes.
  * Converts the given class and all of its dependencies to typescript.
@@ -126,6 +153,7 @@ export default class TypescriptDefinitionGenerator {
     private readonly additionalImports: string[] = [];
     private readonly importsToResolve: string[] = [];
     private readonly interfaceImports: string[] = [];
+    private readonly options: Required<GeneratorOpts>;
 
     /**
      * Create a new `TypescriptDefinitionGenerator` instance
@@ -138,9 +166,25 @@ export default class TypescriptDefinitionGenerator {
      */
     public constructor(
         private readonly classname: string,
+        opts: GeneratorOpts = {},
         private readonly progressCallback: ProgressCallback | null = null,
         private readonly resolvedImports: string[] = []
-    ) {}
+    ) {
+        this.options = (
+            Object.keys(defaultGeneratorOpts) as (keyof GeneratorOpts)[]
+        )
+            .map((o) => ({
+                name: o,
+                value: !!opts[o] ? opts[o] : defaultGeneratorOpts[o],
+            }))
+            .reduce(
+                (prev, cur) => ({
+                    ...prev,
+                    [cur.name]: cur.value,
+                }),
+                {} as Required<GeneratorOpts>
+            );
+    }
 
     private static async convertMethods(
         methods: DeclaredMethodClass[]
@@ -720,10 +764,19 @@ export default class TypescriptDefinitionGenerator {
             );
         }
 
+        let suffix = '';
+        if (name !== 'newInstanceAsync') {
+            if (isSync) {
+                suffix = this.options.syncSuffix;
+            } else {
+                suffix = this.options.asyncSuffix;
+            }
+        }
+
         let declaration = ts.factory.createMethodDeclaration(
             modifiers,
             undefined,
-            name + (isSync ? 'Sync' : ''),
+            name + suffix,
             undefined,
             undefined,
             this.convertParameters(m),
@@ -899,6 +952,15 @@ export default class TypescriptDefinitionGenerator {
         simpleName: string,
         isAbstractOrInterface: boolean
     ) {
+        let importOpts = '';
+        if (!deepEquals(this.options, defaultGeneratorOpts)) {
+            importOpts = `, {
+                syncSuffix: '${this.options.syncSuffix}',
+                asyncSuffix: '${this.options.asyncSuffix}',
+                customInspect: ${this.options.customInspect},
+            }`;
+        }
+
         const statement = ts.factory.createClassDeclaration(
             [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
             simpleName,
@@ -907,7 +969,7 @@ export default class TypescriptDefinitionGenerator {
                 ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
                     ts.factory.createExpressionWithTypeArguments(
                         ts.factory.createIdentifier(
-                            `importClass<typeof ${simpleName}Class>('${this.classname}')`
+                            `importClass<typeof ${simpleName}Class>('${this.classname}'${importOpts})`
                         ),
                         undefined
                     ),
@@ -987,9 +1049,8 @@ export default class TypescriptDefinitionGenerator {
         const fields = (await cls.getFields()).filter(onlyUnique);
         const methods = await cls.getMethods();
 
-        const classMembers: ts.ClassElement[] = await this.convertFields(
-            fields
-        );
+        const classMembers: ts.ClassElement[] =
+            await this.convertFields(fields);
 
         const convertedMethods =
             await TypescriptDefinitionGenerator.convertMethods(methods);
@@ -1000,9 +1061,8 @@ export default class TypescriptDefinitionGenerator {
         const isAbstractOrInterface = await this.isAbstractOrInterface(cls);
         if (!isAbstractOrInterface) {
             const constructors = await cls.getDeclaredConstructors();
-            const convertedConstructors = await this.convertConstructors(
-                constructors
-            );
+            const convertedConstructors =
+                await this.convertConstructors(constructors);
             classMembers.push(...convertedConstructors);
         }
 
@@ -1079,6 +1139,7 @@ export default class TypescriptDefinitionGenerator {
         for (const imported of this.additionalImports) {
             const generator = new TypescriptDefinitionGenerator(
                 imported,
+                this.options,
                 this.progressCallback,
                 this.resolvedImports
             );

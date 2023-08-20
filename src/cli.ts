@@ -10,6 +10,9 @@ interface Args {
     classnames: string[];
     output: string;
     classpath?: string | string[];
+    syncSuffix?: string;
+    asyncSuffix?: string;
+    customInspect?: boolean;
 }
 
 type YargsHandler<T> = (args: yargs.ArgumentsCamelCase<T>) => Promise<void>;
@@ -20,27 +23,41 @@ const importChalk = (): Promise<typeof import('chalk').default> =>
     eval("import('chalk').then(chalk => chalk.default)");
 
 const builder: yargs.BuilderCallback<{}, Args> = (command) => {
-    command.positional('classnames', {
-        describe: 'The fully qualified class name(s) to convert',
-        type: 'string',
-    });
-
-    command.positional('output', {
-        describe: 'The output file',
-        type: 'string',
-    });
-
-    command.option('classpath', {
-        alias: 'cp',
-        type: 'string',
-        describe: 'The classpath to use',
-    });
+    command
+        .positional('classnames', {
+            describe: 'The fully qualified class name(s) to convert',
+            type: 'string',
+        })
+        .positional('output', {
+            describe: 'The output file',
+            type: 'string',
+        })
+        .option('classpath', {
+            alias: 'cp',
+            type: 'string',
+            describe: 'The classpath to use',
+        })
+        .option('syncSuffix', {
+            type: 'string',
+            describe: 'The sync suffix',
+        })
+        .option('asyncSuffix', {
+            type: 'string',
+            describe: 'The async suffix',
+        })
+        .option('customInspect', {
+            type: 'boolean',
+            describe: "Whether to enable the 'customInspect' option",
+        });
 };
 
 const handler: YargsHandler<Args> = async ({
     classnames,
     output,
     classpath,
+    syncSuffix,
+    asyncSuffix,
+    customInspect,
 }) => {
     let spinner: Ora | null = null;
     try {
@@ -110,6 +127,11 @@ const handler: YargsHandler<Args> = async ({
         for (const classname of classnames) {
             const generator = new TypescriptDefinitionGenerator(
                 classname,
+                {
+                    syncSuffix,
+                    asyncSuffix,
+                    customInspect,
+                },
                 (name) => {
                     lastClassResolved = name;
                     resolvedCounter++;
