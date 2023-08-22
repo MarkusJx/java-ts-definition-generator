@@ -1,19 +1,11 @@
 import yargs from 'yargs';
 import { performance } from 'perf_hooks';
 import path from 'path';
-import java, { ensureJvm, getJavaInstance } from 'java-bridge';
-import { TypescriptDefinitionGenerator } from './index';
 import { version } from '../package.json';
 import type { Ora } from 'ora';
-
-interface Args {
-    classnames: string[];
-    output: string;
-    classpath?: string | string[];
-    syncSuffix?: string;
-    asyncSuffix?: string;
-    customInspect?: boolean;
-}
+import { javaBridgeVersion } from './util/versions';
+import { Worker } from 'worker_threads';
+import { Args, CommMessage, StartMessage } from './worker/comm';
 
 type YargsHandler<T> = (args: yargs.ArgumentsCamelCase<T>) => Promise<void>;
 
@@ -48,25 +40,19 @@ const builder: yargs.BuilderCallback<{}, Args> = (command) => {
         .option('customInspect', {
             type: 'boolean',
             describe: "Whether to enable the 'customInspect' option",
+        })
+        .option('targetVersion', {
+            type: 'string',
+            describe: 'The version of java-bridge to target',
         });
 };
 
-const handler: YargsHandler<Args> = async ({
-    classnames,
-    output,
-    classpath,
-    syncSuffix,
-    asyncSuffix,
-    customInspect,
-}) => {
+const handler: YargsHandler<Args> = async (args) => {
+    const { classnames, output } = args;
+
     let spinner: Ora | null = null;
     try {
         const startTime = performance.now();
-        ensureJvm();
-
-        if (classpath) {
-            java.classpath.append(classpath);
-        }
 
         const chalk = await importChalk();
         const ora = await importOra();
@@ -77,17 +63,11 @@ const handler: YargsHandler<Args> = async ({
             )} Java definition generator`
         );
 
-        const javaInstance = getJavaInstance()!;
-        const loadedJars = java.classpath.get();
-        if (loadedJars.length > 0) {
-            console.log(
-                `Started JVM with version ${chalk.cyanBright(
-                    javaInstance.version
-                )} and classpath '${loadedJars
-                    .map((j) => chalk.cyanBright(j))
-                    .join(';')}'`
-            );
-        }
+        console.log(
+            `Using ${chalk.cyanBright(
+                'java-bridge'
+            )} version ${chalk.greenBright('v' + javaBridgeVersion)}`
+        );
 
         console.log(
             `Converting classes ${classnames
@@ -99,9 +79,6 @@ const handler: YargsHandler<Args> = async ({
             )}`
         );
 
-        spinner = ora().start();
-
-        const resolvedImports: string[] = [];
         let resolvedCounter: number = 0;
         let numResolved: number = 0;
 
@@ -124,36 +101,52 @@ const handler: YargsHandler<Args> = async ({
             );
         };
 
-        for (const classname of classnames) {
-            const generator = new TypescriptDefinitionGenerator(
-                classname,
-                {
-                    syncSuffix,
-                    asyncSuffix,
-                    customInspect,
-                },
-                (name) => {
-                    lastClassResolved = name;
-                    resolvedCounter++;
-                    setText();
-                },
-                resolvedImports
-            );
-            const generated = await generator.generate();
-            numResolved += generated.length;
+        const worker = new Worker(path.join(__dirname, 'cliWorker.js'));
+        worker.on('message', (msg: CommMessage) => {
+            switch (msg.type) {
+                case 'updateSpinner': {
+                    ({ lastClassResolved, numResolved, resolvedCounter } =
+                        msg.args);
+                    if (msg.args.text) {
+                        spinner!.text = msg.args.text!;
+                    } else {
+                        setText();
+                    }
+                    break;
+                }
+                case 'done': {
+                    clearInterval(timeElapsedInterval);
+                    const timeElapsed = (
+                        (performance.now() - startTime) /
+                        1000
+                    ).toFixed(1);
+                    spinner!.succeed(
+                        `Success - Converted ${chalk.blueBright(
+                            numResolved
+                        )} classes in ${chalk.blueBright(timeElapsed)} seconds`
+                    );
+                    worker.terminate();
+                    break;
+                }
+                case 'startSpinner': {
+                    spinner = ora().start();
+                    break;
+                }
+                case 'error': {
+                    spinner?.fail('Failed to convert classes');
+                    console.error(msg.error);
+                    process.exit(1);
+                    break;
+                }
+            }
+        });
 
-            spinner!.text = 'saving results';
-            await TypescriptDefinitionGenerator.save(generated, output);
-        }
-
-        clearInterval(timeElapsedInterval);
-        const timeElapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-        spinner!.succeed(
-            `Success - Converted ${chalk.blueBright(
-                numResolved
-            )} classes in ${chalk.blueBright(timeElapsed)} seconds`
-        );
+        worker.postMessage({
+            type: 'start',
+            args,
+        } as StartMessage);
     } catch (e) {
+        // @ts-expect-error
         spinner?.fail('Failed to convert classes');
         console.error(e);
         process.exit(1);

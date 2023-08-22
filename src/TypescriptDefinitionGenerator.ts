@@ -1,7 +1,17 @@
 import ts, { SyntaxKind } from 'typescript';
-import { importClass, importClassAsync, JavaClass } from 'java-bridge';
+import { importClass, importClassAsync } from 'java-bridge';
 import fs from 'fs';
 import path from 'path';
+import { deepEquals, mergeObjects } from './util/util';
+import type {
+    ClassClass,
+    DeclaredConstructorClass,
+    DeclaredMethodClass,
+    FieldClass,
+    ModifierClass,
+} from './util/declarations';
+import { GeneratorOpts, defaultGeneratorOpts } from './util/options';
+import { checkOptionsForVersion } from './util/versions';
 
 const sourceFile = ts.createSourceFile(
     'source.ts',
@@ -37,59 +47,6 @@ export interface ModuleDeclaration {
  */
 export type ProgressCallback = (classname: string) => void;
 
-declare class ModifierClass extends JavaClass {
-    public static isPublic(val: number): Promise<boolean>;
-    public static isStatic(val: number): Promise<boolean>;
-    public static isStaticSync(val: number): boolean;
-    public static isFinal(val: number): Promise<boolean>;
-    public static isAbstract(val: number): Promise<boolean>;
-}
-
-declare class TypeClass extends JavaClass {
-    public getTypeName(): Promise<string>;
-}
-
-/**
- * @ignore
- */
-declare class DeclaredMethodClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getName(): Promise<string>;
-    public getReturnType(): Promise<TypeClass>;
-    public getParameterTypes(): Promise<TypeClass[]>;
-    public isDefault(): Promise<boolean>;
-}
-
-/**
- * @ignore
- */
-declare class DeclaredConstructorClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getParameterTypes(): Promise<TypeClass[]>;
-}
-
-/**
- * @ignore
- */
-declare class ClassClass extends JavaClass {
-    public getMethods(): Promise<DeclaredMethodClass[]>;
-    public getDeclaredConstructors(): Promise<DeclaredConstructorClass[]>;
-    public getFields(): Promise<FieldClass[]>;
-    public getModifiers(): Promise<number>;
-    public isInterface(): Promise<boolean>;
-    public isInterfaceSync(): boolean;
-}
-
-/**
- * @ignore
- */
-declare class FieldClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getName(): Promise<string>;
-    public getNameSync(): string;
-    public getType(): Promise<TypeClass>;
-}
-
 /**
  * A list of methods which probably never return null
  */
@@ -102,33 +59,6 @@ const nonNullReturnMethods: string[] = [
     'notifyAll',
     'equals',
 ];
-
-export interface GeneratorOpts {
-    asyncSuffix?: string;
-    syncSuffix?: string;
-    customInspect?: boolean;
-}
-
-const defaultGeneratorOpts: Required<GeneratorOpts> = {
-    asyncSuffix: '',
-    syncSuffix: 'Sync',
-    customInspect: false,
-};
-
-const deepEquals = <T extends {}>(a: T, b: T): boolean => {
-    return (Object.keys(a) as (keyof T)[]).every((key) => {
-        if (
-            typeof a[key] === 'object' &&
-            !!a[key] &&
-            typeof b[key] === 'object' &&
-            !!b[key]
-        ) {
-            return deepEquals(a[key], b[key]);
-        } else {
-            return a[key] === b[key];
-        }
-    });
-};
 
 /**
  * A class to generate typescript definitions for java classes.
@@ -170,20 +100,8 @@ export default class TypescriptDefinitionGenerator {
         private readonly progressCallback: ProgressCallback | null = null,
         private readonly resolvedImports: string[] = []
     ) {
-        this.options = (
-            Object.keys(defaultGeneratorOpts) as (keyof GeneratorOpts)[]
-        )
-            .map((o) => ({
-                name: o,
-                value: !!opts[o] ? opts[o] : defaultGeneratorOpts[o],
-            }))
-            .reduce(
-                (prev, cur) => ({
-                    ...prev,
-                    [cur.name]: cur.value,
-                }),
-                {} as Required<GeneratorOpts>
-            );
+        checkOptionsForVersion(opts);
+        this.options = mergeObjects(opts, defaultGeneratorOpts);
     }
 
     private static async convertMethods(

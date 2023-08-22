@@ -26,6 +26,9 @@ Options:
   --help             Show help                                         [boolean]
   --version          Show version number                               [boolean]
   --classpath, --cp  The classpath to use                               [string]
+  --syncSuffix       The sync suffix                                    [string]
+  --asyncSuffix      The async suffix                                   [string]
+  --customInspect    Whether to enable the 'customInspect' option      [boolean]
 ```
 
 ### Notes

@@ -1,8 +1,8 @@
 import TypescriptDefinitionGenerator, {
-    GeneratorOpts,
     ModuleDeclaration,
     ProgressCallback,
 } from './TypescriptDefinitionGenerator';
+import { GeneratorOpts } from './util/options';
 
 /**
  * Generates a lot of definitions for a lot of modules at once.

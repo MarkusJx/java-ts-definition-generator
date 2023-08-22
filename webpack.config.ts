@@ -12,6 +12,10 @@ module.exports = {
                 type: 'umd',
             },
         },
+        cliWorker: {
+            import: './src/worker/cliWorker.ts',
+            filename: 'cliWorker.js',
+        },
         cli: {
             import: './src/cli.ts',
             filename: 'java-ts-gen.js',
@@ -29,6 +33,7 @@ module.exports = {
     },
     node: {
         __dirname: false,
+        __filename: true,
     },
     module: {
         rules: [
