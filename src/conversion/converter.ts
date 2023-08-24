@@ -201,16 +201,21 @@ export default class Converter {
         }
     }
 
-    public convertClassMethods(method: JavaMethod[], name: string): void {
-        for (let i = 0; i < method.length; i++) {
-            const m = method[i];
+    public convertClassMethods(
+        methods: JavaMethod[],
+        methodName: string
+    ): void {
+        methods.forEach((method, i) => {
+            if (methodName === 'toString') {
+                return;
+            }
 
-            const nonNullReturnType = nonNullReturnMethods.includes(name);
+            const nonNullReturnType = nonNullReturnMethods.includes(methodName);
             this.members.addMembers(
-                this.createMethod(m, i, false, nonNullReturnType),
-                this.createMethod(m, i, true, nonNullReturnType)
+                this.createMethod(method, i, false, nonNullReturnType),
+                this.createMethod(method, i, true, nonNullReturnType)
             );
-        }
+        });
     }
 
     private getImports(): ts.ImportDeclaration {
