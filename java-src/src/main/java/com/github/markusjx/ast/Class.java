@@ -61,6 +61,7 @@ public class Class implements JsonConvertible {
                      .map(s -> s.replaceAll("\\[", "").replaceAll("]", ""))
                      .filter(Helpers::notObjectOrVoid)
                      .map(Helpers::primitiveToClassType)
+                     .filter(s -> !s.equals(this.name))
                      .distinct()
                      .toArray(String[]::new);
     }

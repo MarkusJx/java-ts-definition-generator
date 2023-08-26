@@ -71,6 +71,8 @@ export default class TypescriptDefinitionGenerator
      * Create a {@link TypescriptDefinitionGenerator} instance using the
      * implementation chosen by {@link getImpl}.
      *
+     * **Note:** The `resolvedClasses` parameter may be modified by this class.
+     *
      * ## Example
      * ```ts
      * import { TypescriptDefinitionGenerator } from 'java-ts-definition-generator';
@@ -120,7 +122,9 @@ export default class TypescriptDefinitionGenerator
      * the documentation of that class for further information.
      *
      * This method should also not be called directly, the constructor
-     * of {@link TypescriptDefinitionGenerator} should be used insted.
+     * of {@link TypescriptDefinitionGenerator} should be used instead.
+     *
+     * **Note:** The `resolvedClasses` parameter may be modified by this class.
      *
      * @param classnames the names of the classes to resolve
      * @param opts the import options

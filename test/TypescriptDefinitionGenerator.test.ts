@@ -1,4 +1,10 @@
-import { ModuleDeclaration, TypescriptDefinitionGenerator } from '../.';
+import {
+    ModuleDeclaration,
+    TypescriptDefinitionGenerator,
+    DefinitionGeneratorIf,
+    JavaDefinitionGenerator,
+    TsDefinitionGenerator,
+} from '../.';
 import { expect } from 'chai';
 import ts from 'typescript';
 import path from 'path';
@@ -87,48 +93,106 @@ async function checkDeclarations(
     expect(diagnostics, JSON.stringify(diagnostics, null, 4)).to.be.empty;
 }
 
-describe('TypescriptDefinitionGenerator test', () => {
-    it("Generate 'java.util.Iterator' definitions", async () => {
-        const generator = new TypescriptDefinitionGenerator(
-            'java.util.Iterator'
-        );
+type DefinitionGeneratorConstructor = {
+    new (classnames: string | string[]): DefinitionGeneratorIf;
+};
 
-        const declarations = await generator.createModuleDeclarations();
-        expect(declarations.map((d) => d.name)).members([
-            'java.util.Iterator',
-            'java.util.function.Consumer',
-        ]);
-        expect(declarations.every((d) => d.contents.length > 0)).to.be.true;
+const testGenerateIteratorDefinitions = async (
+    gen: DefinitionGeneratorConstructor
+) => {
+    const generator = new TypescriptDefinitionGenerator(
+        new gen('java.util.Iterator')
+    );
 
-        await checkDeclarations(
-            declarations,
-            `
+    const declarations = await generator.createModuleDeclarations();
+    expect(declarations.map((d) => d.name)).members([
+        'java.util.Iterator',
+        'java.util.function.Consumer',
+    ]);
+    expect(declarations.every((d) => d.contents.length > 0)).to.be.true;
+
+    await checkDeclarations(
+        declarations,
+        `
             import { Iterator } from './java/util/Iterator';
 
             const iterator: Iterator | null = null;
             iterator!.instanceOf(Iterator);
             `
-        );
-    }).timeout(timeoutMs);
+    );
+};
 
-    it("Generate 'java.io.FileOutputSteam' definitions", async function () {
-        if (isCi && !forceRunAllTests) {
-            this.skip();
-        }
+const testGenerateFileOutputStreamDefinitions = async (
+    gen: DefinitionGeneratorConstructor
+) => {
+    const generator = new TypescriptDefinitionGenerator(
+        new gen('java.io.FileOutputStream')
+    );
 
-        const generator = new TypescriptDefinitionGenerator(
-            'java.io.FileOutputStream'
-        );
-
-        const declarations = await generator.createModuleDeclarations();
-        await checkDeclarations(
-            declarations,
-            `
+    const declarations = await generator.createModuleDeclarations();
+    await checkDeclarations(
+        declarations,
+        `
             import { FileOutputStream } from './java/io/FileOutputStream';
 
             FileOutputStream.nullOutputStreamSync()!.flushSync();
             `
-        );
+    );
+};
+
+const testGenerateIteratorDefTree = async (
+    gen: DefinitionGeneratorConstructor
+) => {
+    const generator = new TypescriptDefinitionGenerator(
+        new gen('java.util.Iterator')
+    );
+
+    const tree = await generator.createDefinitionTree();
+    expect(tree).to.be.not.null;
+    expect(tree.root).members(['java.util.Iterator']);
+    expect(tree.classes.map((c) => c.name)).members([
+        'java.util.Iterator',
+        'java.util.function.Consumer',
+    ]);
+    expect(tree.classes[0].name).to.equal('java.util.Iterator');
+    expect(tree.classes[0].imports).to.have.members([
+        'java.util.function.Consumer',
+    ]);
+    expect(tree.classes[1].name).to.equal('java.util.function.Consumer');
+    expect(tree.classes[1].imports).to.be.empty;
+};
+
+describe('TypescriptDefinitionGenerator test', () => {
+    it("Generate 'java.util.Iterator' definitions using java implementation", async () => {
+        await testGenerateIteratorDefinitions(JavaDefinitionGenerator);
+    }).timeout(timeoutMs);
+
+    it("Generate 'java.util.Iterator' definitions using ts implementation", async () => {
+        await testGenerateIteratorDefinitions(TsDefinitionGenerator);
+    }).timeout(timeoutMs);
+
+    it("Generate 'java.util.Iterator' definition tree using java implementation", async () => {
+        await testGenerateIteratorDefTree(JavaDefinitionGenerator);
+    }).timeout(timeoutMs);
+
+    it("Generate 'java.util.Iterator' definition tree using ts implementation", async () => {
+        await testGenerateIteratorDefTree(TsDefinitionGenerator);
+    }).timeout(timeoutMs);
+
+    it("Generate 'java.io.FileOutputSteam' definitions using java implementation", async function () {
+        if (isCi && !forceRunAllTests) {
+            this.skip();
+        }
+
+        await testGenerateFileOutputStreamDefinitions(JavaDefinitionGenerator);
+    }).timeout(timeoutMs * 4);
+
+    it("Generate 'java.io.FileOutputSteam' definitions using ts implementation", async function () {
+        if (isCi && !forceRunAllTests) {
+            this.skip();
+        }
+
+        await testGenerateFileOutputStreamDefinitions(TsDefinitionGenerator);
     }).timeout(timeoutMs * 4);
 });
 

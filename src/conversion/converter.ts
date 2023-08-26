@@ -20,7 +20,6 @@ import {
 import {
     getImportPath,
     getSimpleName,
-    hashMapToRecord,
     isPrimitive,
     primitiveToClassType,
 } from './helpers';
@@ -283,7 +282,7 @@ export default class Converter {
     private createInterfaceMethodSignatures(
         interfaceMethods: Record<string, JavaMethodDefinition[]>
     ): ts.MethodSignature[] {
-        return Object.entries(hashMapToRecord(interfaceMethods))
+        return Object.entries(interfaceMethods)
             .map(([key, method]) => ({
                 key,
                 method: method.filter(

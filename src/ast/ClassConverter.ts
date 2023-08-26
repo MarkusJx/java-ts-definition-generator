@@ -10,7 +10,7 @@ export default class ClassConverter {
         private readonly callback: (cls: JavaClass) => void,
         private readonly resolvedClasses: string[] = []
     ) {
-        this.queue = Array.isArray(initial) ? initial : [initial];
+        this.queue = Array.isArray(initial) ? initial.concat() : [initial];
     }
 
     public async createClassDefinitionTree(name: string) {

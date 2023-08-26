@@ -12,38 +12,14 @@ import JavaMethod from './JavaMethod';
 import { unique } from '../util/util';
 import Converter from '../conversion/converter';
 import {
-    hashMapToRecord,
+    isPrimitive,
+    noArrays,
+    nonPrimitive,
+    notObjectOrVoid,
     primitiveToClassType,
     toObject,
 } from '../conversion/helpers';
 import { GeneratorOpts } from '../util/options';
-
-const basicTypes = [
-    /*'boolean',
-    'byte',
-    'char',
-    'short',
-    'int',
-    'long',
-    'float',
-    'double',*/
-    'void',
-    /*'java.lang.Integer',
-    'java.lang.Float',
-    'java.lang.Double',
-    'java.lang.Byte',
-    'java.lang.Short',
-    'java.lang.Long',
-    'java.lang.Character',
-    'java.lang.String',
-    'java.lang.Boolean',*/
-    'java.lang.Void',
-    'java.lang.Object',
-];
-
-const noBasicTypes = (key: string) => !basicTypes.includes(key);
-const toObjects = (key: string): string => primitiveToClassType(key);
-const noArrays = (key: string) => key.replaceAll('[', '').replaceAll(']', '');
 
 export default class JavaClass implements JavaClassDefinition {
     public readonly imports: string[];
@@ -83,31 +59,24 @@ export default class JavaClass implements JavaClassDefinition {
     }
 
     private calculateImports(): string[] {
-        const imports: string[] = [];
-
-        for (const method of Object.values(this.methods).flatMap((m) => m)) {
-            imports.push(...method.parameters, method.returnType);
-        }
-
-        for (const field of this.fields) {
-            imports.push(field.type);
-        }
-
-        for (const constructor of this.constructors) {
-            imports.push(...constructor.parameters);
-        }
-
-        return imports
+        return Object.values(this.methods)
+            .flatMap((m) => m)
+            .flatMap((m) =>
+                isPrimitive(m.returnType)
+                    ? m.parameters
+                    : m.parameters.concat(m.returnType)
+            )
+            .concat(this.fields.map((f) => f.type).filter(nonPrimitive))
+            .concat(this.constructors.flatMap((c) => c.parameters))
             .map(noArrays)
-            .filter(noBasicTypes)
-            .map(toObjects)
+            .filter(notObjectOrVoid)
+            .map(primitiveToClassType)
+            .filter((s) => s !== this.name)
             .filter(unique);
     }
 
     private convertMethods(converter: Converter): void {
-        for (const [name, methods] of Object.entries(
-            hashMapToRecord(this.methods)
-        )) {
+        for (const [name, methods] of Object.entries(this.methods)) {
             converter.convertClassMethods(methods, name);
         }
     }
