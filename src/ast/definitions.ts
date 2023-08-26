@@ -1,10 +1,8 @@
 import { JavaClass, JavaDefinitions } from './types';
 import Class from './class';
-import { ModuleDeclaration } from '../TypescriptDefinitionGenerator';
 import { GeneratorOpts } from '../util/options';
 import ClassConverter from './classConverter';
-
-export type ConvertCallback = (classNames: string | string[]) => void;
+import { ModuleDeclaration, ConvertCallback } from '../types';
 
 export default class Definitions implements JavaDefinitions {
     private constructor(
@@ -93,12 +91,12 @@ export default class Definitions implements JavaDefinitions {
         name: string[],
         callback?: ConvertCallback | null,
         resolvedClasses?: string[]
-    ): Promise<Definitions[]>;
+    ): Promise<Definitions>;
     public static async createDefinitionTree(
         name: string | string[],
         callback?: ConvertCallback | null,
         resolvedClasses: string[] = []
-    ): Promise<Definitions | Definitions[]> {
+    ): Promise<Definitions> {
         const classes: JavaClass[] = [];
         const converter = new ClassConverter(
             name,

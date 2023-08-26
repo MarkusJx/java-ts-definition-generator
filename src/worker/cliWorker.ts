@@ -9,8 +9,6 @@ import {
     UpdateSpinner,
 } from './comm';
 import java, { ensureJvm, getJavaInstance } from 'java-bridge';
-import { mergeObjects } from '../util/util';
-import { defaultGeneratorOpts } from '../util/options';
 import TypescriptDefinitionGenerator from '../TypescriptDefinitionGenerator';
 import { TsDefinitionGenerator } from '../generators/TsDefinitionGenerator';
 
@@ -41,24 +39,12 @@ const importChalk = (): Promise<typeof import('chalk').default> =>
 const convert = async ({
     classnames,
     fastConvert,
-    syncSuffix,
-    asyncSuffix,
-    customInspect,
-    targetVersion,
     output,
     classpath,
+    targetVersion,
+    ...otherOpts
 }: Args) => {
     ensureJvm();
-
-    const opts = mergeObjects(
-        {
-            syncSuffix,
-            asyncSuffix,
-            customInspect,
-            targetVersion: targetVersion ? parseVersion(targetVersion) : null,
-        },
-        defaultGeneratorOpts
-    );
 
     if (classpath) {
         java.classpath.append(classpath);
@@ -77,6 +63,11 @@ const convert = async ({
                 .join(';')}'`
         );
     }
+
+    const opts = {
+        targetVersion: targetVersion ? parseVersion(targetVersion) : null,
+        ...otherOpts,
+    };
 
     parentPort?.postMessage({
         type: 'startSpinner',

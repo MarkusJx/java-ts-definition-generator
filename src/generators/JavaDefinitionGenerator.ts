@@ -4,7 +4,6 @@ import {
     importClass,
     newProxy,
 } from 'java-bridge';
-import { ModuleDeclaration } from '../TypescriptDefinitionGenerator';
 import { JavaClass, JavaDefinitions } from '../ast/types';
 import {
     ConsumerProxy,
@@ -14,12 +13,11 @@ import {
 } from './javaClasses';
 import Class from '../ast/class';
 import path from 'path';
-import { GeneratorOpts } from '../util/options';
 import {
-    ConvertCallback,
     DefinitionGenerator,
     DefinitionGeneratorIf,
 } from './DefinitionGenerator';
+import { ConvertCallback, ModuleDeclaration } from '../types';
 
 export class JavaDefinitionGenerator
     extends DefinitionGenerator
@@ -27,14 +25,6 @@ export class JavaDefinitionGenerator
 {
     private static _either: typeof EitherClass | null = null;
     private static _javaDefinitions: typeof DefinitionsClass | null = null;
-
-    public constructor(
-        classnames: string | string[],
-        opts: Required<GeneratorOpts>,
-        resolvedClasses: string[] = []
-    ) {
-        super(classnames, opts, resolvedClasses);
-    }
 
     public async createModuleDeclaration(
         callback?: ConvertCallback | null | undefined

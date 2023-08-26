@@ -1,8 +1,7 @@
-import { ModuleDeclaration } from '../TypescriptDefinitionGenerator';
 import Definitions from '../ast/definitions';
 import { JavaDefinitions } from '../ast/types';
+import { ConvertCallback, ModuleDeclaration } from '../types';
 import {
-    ConvertCallback,
     DefinitionGenerator,
     DefinitionGeneratorIf,
 } from './DefinitionGenerator';

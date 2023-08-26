@@ -142,7 +142,6 @@ const handler: YargsHandler<Args> = async (args) => {
                     spinner?.fail('Failed to convert classes');
                     console.error(msg.error);
                     process.exit(1);
-                    break;
                 }
             }
         });
