@@ -1,6 +1,7 @@
 export interface Args {
     classnames: string[];
     output: string;
+    fastConvert: boolean;
     classpath?: string | string[];
     syncSuffix?: string;
     asyncSuffix?: string;

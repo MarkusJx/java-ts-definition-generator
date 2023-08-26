@@ -8,7 +8,7 @@ export type ConvertCallback = (classNames: string | string[]) => void;
 
 export default class Definitions implements JavaDefinitions {
     private constructor(
-        public readonly root: string,
+        public readonly root: string[],
         public readonly classes: JavaClass[]
     ) {}
 
@@ -39,21 +39,25 @@ export default class Definitions implements JavaDefinitions {
     }
 
     public static async readAndConvert(
-        name: string,
+        name: string | string[],
         opts: Required<GeneratorOpts>,
-        callback?: ConvertCallback
+        callback?: ConvertCallback | null,
+        resolvedClasses: string[] = []
     ): Promise<ModuleDeclaration[]> {
         const res: ModuleDeclaration[] = [];
-        const converter = new ClassConverter(name, (cls) =>
-            res.push({
-                name: cls.name,
-                contents: cls.convert(opts),
-            })
+        const converter = new ClassConverter(
+            name,
+            (cls) =>
+                res.push({
+                    name: cls.name,
+                    contents: cls.convert(opts),
+                }),
+            resolvedClasses
         );
 
         let cur: string | null = converter.popQueue();
         while (cur) {
-            if (converter.queueLength > 1) {
+            if (converter.queueLength >= 1) {
                 const queueCopy = [cur, ...converter.queue];
                 converter.clearQueue();
 
@@ -80,12 +84,27 @@ export default class Definitions implements JavaDefinitions {
         return res;
     }
 
-    public static async createSyntaxTree(
+    public static async createDefinitionTree(
         name: string,
-        callback?: ConvertCallback
-    ): Promise<Definitions> {
+        callback?: ConvertCallback | null,
+        resolvedClasses?: string[]
+    ): Promise<Definitions>;
+    public static async createDefinitionTree(
+        name: string[],
+        callback?: ConvertCallback | null,
+        resolvedClasses?: string[]
+    ): Promise<Definitions[]>;
+    public static async createDefinitionTree(
+        name: string | string[],
+        callback?: ConvertCallback | null,
+        resolvedClasses: string[] = []
+    ): Promise<Definitions | Definitions[]> {
         const classes: JavaClass[] = [];
-        const converter = new ClassConverter(name, (cls) => classes.push(cls));
+        const converter = new ClassConverter(
+            name,
+            (cls) => classes.push(cls),
+            resolvedClasses
+        );
 
         let cur: string | null = converter.popQueue();
         while (cur) {
@@ -97,6 +116,6 @@ export default class Definitions implements JavaDefinitions {
             cur = converter.popQueue();
         }
 
-        return new Definitions(name, classes);
+        return new Definitions(Array.isArray(name) ? name : [name], classes);
     }
 }

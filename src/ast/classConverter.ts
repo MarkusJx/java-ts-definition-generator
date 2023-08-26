@@ -3,14 +3,14 @@ import Class from './class';
 import { ClassClass } from '../util/declarations';
 
 export default class ClassConverter {
-    public readonly queue: string[] = [];
-    private readonly resolvedClasses: string[] = [];
+    public readonly queue: string[];
 
     public constructor(
-        initial: string,
-        private readonly callback: (cls: Class) => void
+        initial: string | string[],
+        private readonly callback: (cls: Class) => void,
+        private readonly resolvedClasses: string[] = []
     ) {
-        this.queue.push(initial);
+        this.queue = Array.isArray(initial) ? initial : [initial];
     }
 
     public async createClassDefinitionTree(name: string) {
@@ -20,7 +20,10 @@ export default class ClassConverter {
         this.callback(resolved);
 
         this.queue.push(
-            ...resolved.imports.filter((v) => !this.resolvedClasses.includes(v))
+            ...resolved.imports.filter(
+                (v) =>
+                    !this.resolvedClasses.includes(v) && !this.queue.includes(v)
+            )
         );
     }
 

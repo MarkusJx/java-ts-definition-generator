@@ -34,6 +34,6 @@ export interface JavaClass {
 }
 
 export interface JavaDefinitions {
-    root: string;
+    root: string[];
     classes: JavaClass[];
 }

@@ -73,3 +73,30 @@ export const getImportPath = (classname: string, importStmt: string) => {
 };
 
 export const getSimpleName = (i: string) => i.substring(i.lastIndexOf('.') + 1);
+
+export const hashMapToRecord = <T>(
+    input: Record<string, T>
+): Record<string, T> => {
+    //console.time('hashMapToRecord');
+    try {
+        if (
+            Object.hasOwn(input, 'keySetSync') &&
+            typeof input['keySetSync'] === 'function'
+        ) {
+            const res = {} as Record<string, T>;
+            // @ts-ignore
+            const keys: string[] = input.keySetSync().toArraySync();
+            for (const name of keys) {
+                // @ts-ignore
+                const val = input.getSync(name);
+                res[name] = val;
+            }
+
+            return res;
+        } else {
+            return input;
+        }
+    } finally {
+        //console.timeEnd('hashMapToRecord');
+    }
+};
