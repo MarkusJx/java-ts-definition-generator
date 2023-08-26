@@ -42,7 +42,7 @@ public class Class implements JsonConvertible {
 
         return new Class(name, simpleName, isInterface, isAbstractOrInterface,
                 Helpers.convertMap(ClassMethod.readMethods(cls), ClassMethod[]::new),
-                ClassField.readFields(cls).toArray(ClassField[]::new),
+                ClassField.readFields(cls),
                 ClassConstructor.readConstructors(cls).toArray(ClassConstructor[]::new));
     }
 
@@ -51,8 +51,11 @@ public class Class implements JsonConvertible {
                                          .stream()
                                          .flatMap(Arrays::stream)
                                          .flatMap(m -> Stream.concat(Arrays.stream(
-                                                 m.parameters), Stream.of(m.returnType))),
-                             Stream.concat(Arrays.stream(this.fields).map(f -> f.type),
+                                                 m.parameters), Stream.of(m.returnType)
+                                                                      .filter(Helpers::nonPrimitive))),
+                             Stream.concat(Arrays.stream(this.fields)
+                                                 .map(f -> f.type)
+                                                 .filter(Helpers::nonPrimitive),
                                      Arrays.stream(this.constructors)
                                            .flatMap(c -> Arrays.stream(c.parameters))))
                      .map(s -> s.replaceAll("\\[", "").replaceAll("]", ""))

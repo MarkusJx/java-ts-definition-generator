@@ -1,12 +1,12 @@
 package com.github.markusjx.ast;
 
-//import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.SerializedName;
 
 public enum FieldModifier {
-    //@SerializedName("static")
+    @SerializedName("static")
     STATIC,
-    //@SerializedName("final")
+    @SerializedName("final")
     FINAL,
-    //@SerializedName("default")
+    @SerializedName("default")
     DEFAULT
 }

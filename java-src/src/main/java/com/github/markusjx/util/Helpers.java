@@ -20,6 +20,14 @@ public abstract class Helpers {
         };
     }
 
+    public static boolean nonPrimitive(String type) {
+        return switch (type) {
+            case "boolean", "byte", "char", "short", "int", "long", "float", "double" ->
+                    false;
+            default -> true;
+        };
+    }
+
     public static <T> Map<String, T[]> convertMap(Map<String, List<T>> map,
                                                   IntFunction<T[]> generator
     ) {

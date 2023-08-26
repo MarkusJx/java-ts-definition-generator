@@ -1,5 +1,5 @@
 import { importClassAsync } from 'java-bridge';
-import Class from './class';
+import JavaClass from './JavaClass';
 import { ClassClass } from '../util/declarations';
 
 export default class ClassConverter {
@@ -7,7 +7,7 @@ export default class ClassConverter {
 
     public constructor(
         initial: string | string[],
-        private readonly callback: (cls: Class) => void,
+        private readonly callback: (cls: JavaClass) => void,
         private readonly resolvedClasses: string[] = []
     ) {
         this.queue = Array.isArray(initial) ? initial : [initial];
@@ -16,7 +16,10 @@ export default class ClassConverter {
     public async createClassDefinitionTree(name: string) {
         this.resolvedClasses.push(name);
         const cls = await importClassAsync(name);
-        const resolved = await Class.readClass(cls.class as ClassClass, name);
+        const resolved = await JavaClass.readClass(
+            cls.class as ClassClass,
+            name
+        );
         this.callback(resolved);
 
         this.queue.push(

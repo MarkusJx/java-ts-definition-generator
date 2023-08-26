@@ -1,5 +1,5 @@
 import { JavaClass, JavaInterfaceProxy } from 'java-bridge';
-import { JavaClass as JavaClassDef } from '../ast/types';
+import { JavaClassDefinition as JavaClassDef } from '../ast/types';
 
 export declare class EitherClass<A, B> extends JavaClass {
     private readonly a?: A;

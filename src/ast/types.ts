@@ -9,31 +9,31 @@ export interface JavaFieldBase {
     modifiers: JavaModifier[];
 }
 
-export interface JavaField extends JavaFieldBase {
+export interface JavaFieldDefinition extends JavaFieldBase {
     type: string;
 }
 
-export interface JavaMethod extends JavaFieldBase {
+export interface JavaMethodDefinition extends JavaFieldBase {
     parameters: string[];
     returnType: string;
 }
 
-export interface JavaConstructor {
+export interface JavaConstructorDefinition {
     parameters: string[];
 }
 
-export interface JavaClass {
+export interface JavaClassDefinition {
     name: string;
     simpleName: string;
     isInterface: boolean;
     isAbstractOrInterface: boolean;
-    methods: Record<string, JavaMethod[]>;
-    fields: JavaField[];
-    constructors: JavaConstructor[];
+    methods: Record<string, JavaMethodDefinition[]>;
+    fields: JavaFieldDefinition[];
+    constructors: JavaConstructorDefinition[];
     imports: string[];
 }
 
-export interface JavaDefinitions {
+export interface JavaClassDefinitions {
     root: string[];
-    classes: JavaClass[];
+    classes: JavaClassDefinition[];
 }

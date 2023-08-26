@@ -21,10 +21,11 @@ let resolvedCounter = 0;
 let numResolved = 0;
 const resolvedImports: string[] = [];
 
-const setText = () => {
+const setText = (text?: string) => {
     parentPort?.postMessage({
         type: 'updateSpinner',
         args: {
+            text,
             lastClassResolved,
             numResolved,
             resolvedCounter,
@@ -82,7 +83,7 @@ const convert = async ({
         generator = new TypescriptDefinitionGenerator(classnames, opts);
     }
 
-    await generator.createModuleDeclaration((cur) => {
+    await generator.createModuleDeclarations((cur) => {
         if (Array.isArray(cur)) {
             lastClassResolved = `${cur[0]} and ${cur.length - 1} more`;
             setText();
@@ -96,6 +97,7 @@ const convert = async ({
         }
     });
 
+    setText('Saving results');
     await generator.save(output);
 
     parentPort?.postMessage({

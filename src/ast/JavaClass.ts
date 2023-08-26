@@ -1,9 +1,14 @@
 import { importClassAsync } from 'java-bridge';
 import { ClassClass, ModifierClass } from '../util/declarations';
-import { JavaClass, JavaConstructor, JavaField, JavaMethod } from './types';
-import Field from './field';
-import Constructor from './constructor';
-import Method from './method';
+import {
+    JavaClassDefinition,
+    JavaConstructorDefinition,
+    JavaFieldDefinition,
+    JavaMethodDefinition,
+} from './types';
+import JavaField from './JavaField';
+import JavaConstructor from './JavaConstructor';
+import JavaMethod from './JavaMethod';
 import { unique } from '../util/util';
 import Converter from '../conversion/converter';
 import {
@@ -40,7 +45,7 @@ const noBasicTypes = (key: string) => !basicTypes.includes(key);
 const toObjects = (key: string): string => primitiveToClassType(key);
 const noArrays = (key: string) => key.replaceAll('[', '').replaceAll(']', '');
 
-export default class Class implements JavaClass {
+export default class JavaClass implements JavaClassDefinition {
     public readonly imports: string[];
 
     private constructor(
@@ -48,9 +53,9 @@ export default class Class implements JavaClass {
         public readonly simpleName: string,
         public readonly isInterface: boolean,
         public readonly isAbstractOrInterface: boolean,
-        public readonly methods: Record<string, JavaMethod[]>,
-        public readonly fields: JavaField[],
-        public readonly constructors: JavaConstructor[],
+        public readonly methods: Record<string, JavaMethodDefinition[]>,
+        public readonly fields: JavaFieldDefinition[],
+        public readonly constructors: JavaConstructorDefinition[],
         imports?: string[]
     ) {
         if (imports) {
@@ -60,12 +65,12 @@ export default class Class implements JavaClass {
         }
     }
 
-    public static fromJavaClass(cls: JavaClass): Class {
-        if (cls instanceof Class) {
+    public static fromJavaClass(cls: JavaClassDefinition): JavaClass {
+        if (cls instanceof JavaClass) {
             return cls;
         }
 
-        return new Class(
+        return new JavaClass(
             cls.name,
             cls.simpleName,
             cls.isInterface,
@@ -127,7 +132,7 @@ export default class Class implements JavaClass {
     public static async readClass(
         cls: ClassClass,
         name: string
-    ): Promise<Class> {
+    ): Promise<JavaClass> {
         const simpleName = name.substring(name.lastIndexOf('.') + 1);
 
         const Modifier = await importClassAsync<typeof ModifierClass>(
@@ -139,14 +144,14 @@ export default class Class implements JavaClass {
             (await Modifier.isAbstract(await cls.getModifiers()));
         const isInterface = await cls.isInterface();
 
-        return new Class(
+        return new JavaClass(
             name,
             simpleName,
             isInterface,
             isAbstractOrInterface,
-            toObject(await Method.readMethods(cls)),
-            await Field.readFields(cls),
-            await Constructor.readConstructors(cls)
+            toObject(await JavaMethod.readMethods(cls)),
+            await JavaField.readFields(cls),
+            await JavaConstructor.readConstructors(cls)
         );
     }
 }

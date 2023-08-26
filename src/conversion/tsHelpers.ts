@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { JavaMethod } from '../ast/types';
+import { JavaMethodDefinition } from '../ast/types';
 import ClassMembers from './members';
 import { getSimpleName } from './helpers';
 import { GeneratorOpts, defaultGeneratorOpts } from '../util/options';
@@ -14,7 +14,7 @@ const sourceFile = ts.createSourceFile(
 );
 
 export const createMethodComment = (
-    declaration: JavaMethod,
+    declaration: JavaMethodDefinition,
     additionalComment: string = ''
 ): string => {
     return (

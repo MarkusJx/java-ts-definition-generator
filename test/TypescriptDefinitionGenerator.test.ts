@@ -90,13 +90,10 @@ async function checkDeclarations(
 describe('TypescriptDefinitionGenerator test', () => {
     it("Generate 'java.util.Iterator' definitions", async () => {
         const generator = new TypescriptDefinitionGenerator(
-            'java.util.Iterator',
-            {},
-            null,
-            []
+            'java.util.Iterator'
         );
 
-        const declarations = await generator.generate();
+        const declarations = await generator.createModuleDeclarations();
         expect(declarations.map((d) => d.name)).members([
             'java.util.Iterator',
             'java.util.function.Consumer',
@@ -120,13 +117,10 @@ describe('TypescriptDefinitionGenerator test', () => {
         }
 
         const generator = new TypescriptDefinitionGenerator(
-            'java.io.FileOutputStream',
-            {},
-            null,
-            []
+            'java.io.FileOutputStream'
         );
 
-        const declarations = await generator.generate();
+        const declarations = await generator.createModuleDeclarations();
         await checkDeclarations(
             declarations,
             `

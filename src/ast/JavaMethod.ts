@@ -1,8 +1,8 @@
 import { importClassAsync } from 'java-bridge';
 import { ClassClass, ModifierClass } from '../util/declarations';
-import { JavaMethod, JavaModifier } from './types';
+import { JavaMethodDefinition, JavaModifier } from './types';
 
-export default class Method implements JavaMethod {
+export default class JavaMethod implements JavaMethodDefinition {
     private constructor(
         public readonly name: string,
         public readonly modifiers: JavaModifier[],
@@ -10,13 +10,13 @@ export default class Method implements JavaMethod {
         public readonly returnType: string
     ) {}
 
-    public static async readMethods(cls: ClassClass): Promise<Method[]> {
+    public static async readMethods(cls: ClassClass): Promise<JavaMethod[]> {
         const methods = await cls.getMethods();
         const Modifier = await importClassAsync<typeof ModifierClass>(
             'java.lang.reflect.Modifier'
         );
 
-        const result: Method[] = [];
+        const result: JavaMethod[] = [];
         for (const method of methods) {
             const modifiers = await method.getModifiers();
             if (!(await Modifier.isPublic(modifiers))) {
@@ -37,7 +37,7 @@ export default class Method implements JavaMethod {
             }
 
             result.push(
-                new Method(
+                new JavaMethod(
                     name,
                     mods,
                     await Promise.all(

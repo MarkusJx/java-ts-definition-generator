@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -13,8 +14,8 @@ public class ClassField {
     public final String name;
     public final FieldModifier[] modifiers;
 
-    public static List<ClassField> readFields(java.lang.Class<?> cls) {
-        var res = new ArrayList<ClassField>();
+    public static ClassField[] readFields(java.lang.Class<?> cls) {
+        var res = new HashMap<String, ClassField>();
         for (var field : cls.getFields()) {
             if (!Modifier.isPublic(field.getModifiers())) {
                 continue;
@@ -32,9 +33,9 @@ public class ClassField {
                 mods.add(FieldModifier.FINAL);
             }
 
-            res.add(new ClassField(type, name, mods.toArray(FieldModifier[]::new)));
+            res.put(name, new ClassField(type, name, mods.toArray(FieldModifier[]::new)));
         }
 
-        return res;
+        return res.values().toArray(ClassField[]::new);
     }
 }

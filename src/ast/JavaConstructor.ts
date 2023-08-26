@@ -1,18 +1,18 @@
 import { importClassAsync } from 'java-bridge';
 import { ClassClass, ModifierClass } from '../util/declarations';
-import { JavaConstructor } from './types';
+import { JavaConstructorDefinition } from './types';
 
-export default class Constructor implements JavaConstructor {
+export default class JavaConstructor implements JavaConstructorDefinition {
     private constructor(public readonly parameters: string[]) {}
 
     public static async readConstructors(
         cls: ClassClass
-    ): Promise<Constructor[]> {
+    ): Promise<JavaConstructor[]> {
         const Modifier = await importClassAsync<typeof ModifierClass>(
             'java.lang.reflect.Modifier'
         );
 
-        const res: Constructor[] = [];
+        const res: JavaConstructor[] = [];
         for (const constructor of await cls.getDeclaredConstructors()) {
             const modifiers = await constructor.getModifiers();
             if (!(await Modifier.isPublic(modifiers))) {
@@ -24,7 +24,7 @@ export default class Constructor implements JavaConstructor {
                 parameterTypes.map((p) => p.getTypeName())
             );
 
-            res.push(new Constructor(params));
+            res.push(new JavaConstructor(params));
         }
 
         return res;

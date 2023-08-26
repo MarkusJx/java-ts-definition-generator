@@ -1,6 +1,6 @@
 import { getJavaVersionSync } from 'java-bridge';
 import path from 'path';
-import { JavaDefinitions } from './ast/types';
+import { JavaClassDefinitions } from './ast/types';
 import { DefinitionGeneratorIf } from './generators/DefinitionGenerator';
 import { JavaDefinitionGenerator } from './generators/JavaDefinitionGenerator';
 import { TsDefinitionGenerator } from './generators/TsDefinitionGenerator';
@@ -11,7 +11,7 @@ import { ConvertCallback, ModuleDeclaration } from './types';
 /**
  * A class to generate typescript definitions for java classes.
  * Converts the given class and all of its dependencies to typescript.
- * 
+ *
  * This is a wrapper around the {@link JavaDefinitionGenerator} and
  * {@link TsDefinitionGenerator} instances. A valid instance can either
  * be manually passed to the constructor or will be chosen based on
@@ -41,7 +41,7 @@ export default class TypescriptDefinitionGenerator
 
     /**
      * The typescript module declarations generated
-     * by {@link createModuleDeclaration}.
+     * by {@link createModuleDeclarations}.
      */
     public generatedDeclarations: ModuleDeclaration[] | null = null;
 
@@ -50,19 +50,19 @@ export default class TypescriptDefinitionGenerator
      * {@link DefinitionGeneratorIf} instance. Currently, the passed instance
      * can either be a {@link JavaDefinitionGenerator} or a {@link TsDefinitionGenerator},
      * but custom implementations are also possible.
-     * 
+     *
      * ## Example
      * ```ts
      * import {
      *   TypescriptDefinitionGenerator,
      *   JavaDefinitionGenerator
      * } from 'java-ts-definition-generator';
-     * 
+     *
      * const generator = new TypescriptDefinitionGenerator(
      *   new JavaDefinitionGenerator('java.lang.String')
      * );
      * ```
-     * 
+     *
      * @param impl the instance to create the {@link TypescriptDefinitionGenerator} from
      */
     public constructor(impl: DefinitionGeneratorIf);
@@ -70,18 +70,18 @@ export default class TypescriptDefinitionGenerator
     /**
      * Create a {@link TypescriptDefinitionGenerator} instance using the
      * implementation chosen by {@link getImpl}.
-     * 
+     *
      * ## Example
      * ```ts
      * import { TypescriptDefinitionGenerator } from 'java-ts-definition-generator';
-     * 
+     *
      * const generator = new TypescriptDefinitionGenerator('java.lang.String');
      * ```
-     * 
+     *
      * @see {@link getImpl}
-     * @param classnames 
-     * @param opts 
-     * @param resolvedClasses 
+     * @param classnames the names of the classes to resolve
+     * @param opts the import options
+     * @param resolvedClasses the full names of any previously resolved classes
      */
     public constructor(
         classnames: string | string[],
@@ -114,14 +114,14 @@ export default class TypescriptDefinitionGenerator
      * {@link JavaDefinitionGenerator} if the version of the currently
      * used JVM is greater than or equal to 16, a {@link TsDefinitionGenerator}
      * instance will be returned otherwise.
-     * 
+     *
      * This does not guarantee the returned instance will actually work,
      * {@link JavaDefinitionGenerator} may not work in all cases. Consult
      * the documentation of that class for further information.
-     * 
+     *
      * This method should also not be called directly, the constructor
      * of {@link TypescriptDefinitionGenerator} should be used insted.
-     * 
+     *
      * @param classnames the names of the classes to resolve
      * @param opts the import options
      * @param resolvedClasses the full names of any previously resolved classes
@@ -145,25 +145,25 @@ export default class TypescriptDefinitionGenerator
         }
     }
 
-    public async createModuleDeclaration(
+    public async createModuleDeclarations(
         callback?: ConvertCallback | null | undefined
     ): Promise<ModuleDeclaration[]> {
         this.generatedDeclarations =
-            await this.impl.createModuleDeclaration(callback);
+            await this.impl.createModuleDeclarations(callback);
         return this.generatedDeclarations;
     }
 
     public createDefinitionTree(
         callback?: ConvertCallback | null | undefined
-    ): Promise<JavaDefinitions | JavaDefinitions[]> {
+    ): Promise<JavaClassDefinitions> {
         return this.impl.createDefinitionTree(callback);
     }
 
     /**
      * Save the converted classes to the given directory.
-     * This requires {@link createModuleDeclaration} to be called first.
+     * This requires {@link createModuleDeclarations} to be called first.
      * An error will be thrown if that method has not been called first.
-     * 
+     *
      * @throws if {@link createModuleDeclaration} has not been called yet
      * @param sourceDir the directory to save the files to
      */

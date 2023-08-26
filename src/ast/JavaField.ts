@@ -1,6 +1,6 @@
 import { importClassAsync } from 'java-bridge';
 import { ClassClass, ModifierClass } from '../util/declarations';
-import { JavaField, JavaModifier } from './types';
+import { JavaFieldDefinition, JavaModifier } from './types';
 
 function onlyUnique<T extends { getNameSync(): string }>(
     value: T,
@@ -13,20 +13,20 @@ function onlyUnique<T extends { getNameSync(): string }>(
     );
 }
 
-export default class Field implements JavaField {
+export default class JavaField implements JavaFieldDefinition {
     private constructor(
         public readonly type: string,
         public readonly name: string,
         public readonly modifiers: JavaModifier[]
     ) {}
 
-    public static async readFields(cls: ClassClass): Promise<Field[]> {
+    public static async readFields(cls: ClassClass): Promise<JavaField[]> {
         const fields = (await cls.getFields()).filter(onlyUnique);
         const Modifier = await importClassAsync<typeof ModifierClass>(
             'java.lang.reflect.Modifier'
         );
 
-        const res: Field[] = [];
+        const res: JavaField[] = [];
         for (const field of fields) {
             const javaModifiers = await field.getModifiers();
             if (!(await Modifier.isPublic(javaModifiers))) {
@@ -45,7 +45,7 @@ export default class Field implements JavaField {
                 modifiers.push(JavaModifier.final);
             }
 
-            res.push(new Field(typeName, name, modifiers));
+            res.push(new JavaField(typeName, name, modifiers));
         }
 
         return res;

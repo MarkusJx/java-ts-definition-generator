@@ -11,7 +11,8 @@
         "prebuild": "npm run build:java",
         "build:java": "run-script-os",
         "build:java:darwin:linux": "cd java-src && chmod +x gradlew && ./gradlew shadowJar",
-        "build:java:win32": "cd java-src && .\\gradlew.bat shadowJar"
+        "build:java:win32": "cd java-src && .\\gradlew.bat shadowJar",
+        "docs": "typedoc --out docs src/index.ts"
     },
     "keywords": [],
     "author": "MarkusJx",
@@ -48,6 +49,7 @@
         "run-script-os": "^1.1.6",
         "ts-loader": "^9.4.3",
         "ts-node": "^10.9.1",
+        "typedoc": "^0.25.0",
         "webpack": "^5.88.0",
         "webpack-cli": "^5.1.4",
         "webpack-node-externals": "^3.0.0"

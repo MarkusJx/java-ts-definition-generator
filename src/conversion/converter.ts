@@ -1,8 +1,8 @@
 import ts, { SyntaxKind } from 'typescript';
 import {
-    JavaConstructor,
-    JavaField,
-    JavaMethod,
+    JavaConstructorDefinition,
+    JavaFieldDefinition,
+    JavaMethodDefinition,
     JavaModifier,
 } from '../ast/types';
 import { GeneratorOpts } from '../util/options';
@@ -105,7 +105,9 @@ export default class Converter {
             );
     }
 
-    public createInterfaceDeclaration(methods: Record<string, JavaMethod[]>) {
+    public createInterfaceDeclaration(
+        methods: Record<string, JavaMethodDefinition[]>
+    ) {
         let decl = ts.factory.createInterfaceDeclaration(
             [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
             this.simpleName + 'Interface',
@@ -136,7 +138,9 @@ export default class Converter {
         );
     }
 
-    public convertConstructors(constructors: JavaConstructor[]): void {
+    public convertConstructors(
+        constructors: JavaConstructorDefinition[]
+    ): void {
         constructors
             .map((c) => c.parameters)
             .forEach((parameters, i) => {
@@ -159,7 +163,7 @@ export default class Converter {
             });
     }
 
-    public convertClassFields(fields: JavaField[]): void {
+    public convertClassFields(fields: JavaFieldDefinition[]): void {
         for (const field of fields) {
             const tsModifiers: ts.ModifierLike[] = [
                 ts.factory.createModifier(SyntaxKind.PublicKeyword),
@@ -203,7 +207,7 @@ export default class Converter {
     }
 
     public convertClassMethods(
-        methods: JavaMethod[],
+        methods: JavaMethodDefinition[],
         methodName: string
     ): void {
         methods.forEach((method, i) => {
@@ -277,7 +281,7 @@ export default class Converter {
     }
 
     private createInterfaceMethodSignatures(
-        interfaceMethods: Record<string, JavaMethod[]>
+        interfaceMethods: Record<string, JavaMethodDefinition[]>
     ): ts.MethodSignature[] {
         return Object.entries(hashMapToRecord(interfaceMethods))
             .map(([key, method]) => ({
@@ -302,7 +306,7 @@ export default class Converter {
     }
 
     private createMethodSignature(
-        m: JavaMethod,
+        m: JavaMethodDefinition,
         name: string,
         i: number,
         isDefault: boolean,
@@ -543,7 +547,7 @@ export default class Converter {
     }
 
     private createMethod(
-        m: JavaMethod,
+        m: JavaMethodDefinition,
         i: number,
         isSync: boolean,
         nonNullReturnType: boolean
@@ -625,7 +629,7 @@ export default class Converter {
         );
     }
 
-    private convertParameters(params: JavaMethod) {
+    private convertParameters(params: JavaMethodDefinition) {
         return params.parameters.map(this.convertParameter.bind(this));
     }
 }
