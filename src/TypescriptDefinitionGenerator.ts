@@ -1,7 +1,17 @@
 import ts, { SyntaxKind } from 'typescript';
-import { importClass, importClassAsync, JavaClass } from 'java-bridge';
+import { importClass, importClassAsync } from 'java-bridge';
 import fs from 'fs';
 import path from 'path';
+import { deepEquals, mergeObjects } from './util/util';
+import type {
+    ClassClass,
+    DeclaredConstructorClass,
+    DeclaredMethodClass,
+    FieldClass,
+    ModifierClass,
+} from './util/declarations';
+import { GeneratorOpts, defaultGeneratorOpts } from './util/options';
+import { checkOptionsForVersion } from './util/versions';
 
 const sourceFile = ts.createSourceFile(
     'source.ts',
@@ -36,59 +46,6 @@ export interface ModuleDeclaration {
  * A TypescriptDefinitionGenerator progress callback method
  */
 export type ProgressCallback = (classname: string) => void;
-
-declare class ModifierClass extends JavaClass {
-    public static isPublic(val: number): Promise<boolean>;
-    public static isStatic(val: number): Promise<boolean>;
-    public static isStaticSync(val: number): boolean;
-    public static isFinal(val: number): Promise<boolean>;
-    public static isAbstract(val: number): Promise<boolean>;
-}
-
-declare class TypeClass extends JavaClass {
-    public getTypeName(): Promise<string>;
-}
-
-/**
- * @ignore
- */
-declare class DeclaredMethodClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getName(): Promise<string>;
-    public getReturnType(): Promise<TypeClass>;
-    public getParameterTypes(): Promise<TypeClass[]>;
-    public isDefault(): Promise<boolean>;
-}
-
-/**
- * @ignore
- */
-declare class DeclaredConstructorClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getParameterTypes(): Promise<TypeClass[]>;
-}
-
-/**
- * @ignore
- */
-declare class ClassClass extends JavaClass {
-    public getMethods(): Promise<DeclaredMethodClass[]>;
-    public getDeclaredConstructors(): Promise<DeclaredConstructorClass[]>;
-    public getFields(): Promise<FieldClass[]>;
-    public getModifiers(): Promise<number>;
-    public isInterface(): Promise<boolean>;
-    public isInterfaceSync(): boolean;
-}
-
-/**
- * @ignore
- */
-declare class FieldClass extends JavaClass {
-    public getModifiers(): Promise<number>;
-    public getName(): Promise<string>;
-    public getNameSync(): string;
-    public getType(): Promise<TypeClass>;
-}
 
 /**
  * A list of methods which probably never return null
@@ -126,6 +83,7 @@ export default class TypescriptDefinitionGenerator {
     private readonly additionalImports: string[] = [];
     private readonly importsToResolve: string[] = [];
     private readonly interfaceImports: string[] = [];
+    private readonly options: Required<GeneratorOpts>;
 
     /**
      * Create a new `TypescriptDefinitionGenerator` instance
@@ -138,9 +96,13 @@ export default class TypescriptDefinitionGenerator {
      */
     public constructor(
         private readonly classname: string,
+        opts: GeneratorOpts = {},
         private readonly progressCallback: ProgressCallback | null = null,
         private readonly resolvedImports: string[] = []
-    ) {}
+    ) {
+        checkOptionsForVersion(opts);
+        this.options = mergeObjects(opts, defaultGeneratorOpts);
+    }
 
     private static async convertMethods(
         methods: DeclaredMethodClass[]
@@ -720,10 +682,19 @@ export default class TypescriptDefinitionGenerator {
             );
         }
 
+        let suffix = '';
+        if (name !== 'newInstanceAsync') {
+            if (isSync) {
+                suffix = this.options.syncSuffix;
+            } else {
+                suffix = this.options.asyncSuffix;
+            }
+        }
+
         let declaration = ts.factory.createMethodDeclaration(
             modifiers,
             undefined,
-            name + (isSync ? 'Sync' : ''),
+            name + suffix,
             undefined,
             undefined,
             this.convertParameters(m),
@@ -899,6 +870,15 @@ export default class TypescriptDefinitionGenerator {
         simpleName: string,
         isAbstractOrInterface: boolean
     ) {
+        let importOpts = '';
+        if (!deepEquals(this.options, defaultGeneratorOpts)) {
+            importOpts = `, {
+                syncSuffix: '${this.options.syncSuffix}',
+                asyncSuffix: '${this.options.asyncSuffix}',
+                customInspect: ${this.options.customInspect},
+            }`;
+        }
+
         const statement = ts.factory.createClassDeclaration(
             [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
             simpleName,
@@ -907,7 +887,7 @@ export default class TypescriptDefinitionGenerator {
                 ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
                     ts.factory.createExpressionWithTypeArguments(
                         ts.factory.createIdentifier(
-                            `importClass<typeof ${simpleName}Class>('${this.classname}')`
+                            `importClass<typeof ${simpleName}Class>('${this.classname}'${importOpts})`
                         ),
                         undefined
                     ),
@@ -987,9 +967,8 @@ export default class TypescriptDefinitionGenerator {
         const fields = (await cls.getFields()).filter(onlyUnique);
         const methods = await cls.getMethods();
 
-        const classMembers: ts.ClassElement[] = await this.convertFields(
-            fields
-        );
+        const classMembers: ts.ClassElement[] =
+            await this.convertFields(fields);
 
         const convertedMethods =
             await TypescriptDefinitionGenerator.convertMethods(methods);
@@ -1000,9 +979,8 @@ export default class TypescriptDefinitionGenerator {
         const isAbstractOrInterface = await this.isAbstractOrInterface(cls);
         if (!isAbstractOrInterface) {
             const constructors = await cls.getDeclaredConstructors();
-            const convertedConstructors = await this.convertConstructors(
-                constructors
-            );
+            const convertedConstructors =
+                await this.convertConstructors(constructors);
             classMembers.push(...convertedConstructors);
         }
 
@@ -1079,6 +1057,7 @@ export default class TypescriptDefinitionGenerator {
         for (const imported of this.additionalImports) {
             const generator = new TypescriptDefinitionGenerator(
                 imported,
+                this.options,
                 this.progressCallback,
                 this.resolvedImports
             );

@@ -2,6 +2,7 @@ import TypescriptDefinitionGenerator, {
     ModuleDeclaration,
     ProgressCallback,
 } from './TypescriptDefinitionGenerator';
+import { GeneratorOpts } from './util/options';
 
 /**
  * Generates a lot of definitions for a lot of modules at once.
@@ -45,12 +46,14 @@ export class TypescriptBulkDefinitionGenerator {
      */
     public async generate(
         classnames: string[],
+        options: GeneratorOpts = {},
         progressCallback: ProgressCallback | null = null
     ): Promise<number> {
         let numResolved = 0;
         for (const classname of classnames) {
             const generator = new TypescriptDefinitionGenerator(
                 classname,
+                options,
                 progressCallback,
                 this.resolvedImports
             );
