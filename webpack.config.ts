@@ -1,6 +1,7 @@
 import path from 'path';
 import { BannerPlugin } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
+import CopyPlugin from 'copy-webpack-plugin';
 
 module.exports = {
     entry: {
@@ -60,6 +61,14 @@ module.exports = {
             banner: '#!/usr/bin/env node',
             raw: true,
             include: 'java-ts-gen.js',
+        }),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: './java-src/build/libs/ASTGenerator-*.jar',
+                    to: 'ASTGenerator.jar',
+                },
+            ],
         }),
     ],
     optimization: {

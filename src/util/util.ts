@@ -30,3 +30,7 @@ export const mergeObjects = <T extends {}>(
             {} as Required<T>
         );
 };
+
+export const unique = <T>(value: T, index: number, array: T[]): boolean => {
+    return array.indexOf(value) === index;
+};

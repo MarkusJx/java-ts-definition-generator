@@ -1,5 +1,4 @@
 import { isMainThread, parentPort } from 'worker_threads';
-import TypescriptDefinitionGenerator from '../TypescriptDefinitionGenerator';
 import { parseVersion } from '../util/versions';
 import {
     Args,
@@ -10,6 +9,8 @@ import {
     UpdateSpinner,
 } from './comm';
 import java, { ensureJvm, getJavaInstance } from 'java-bridge';
+import TypescriptDefinitionGenerator from '../TypescriptDefinitionGenerator';
+import { TsDefinitionGenerator } from '../generators/TsDefinitionGenerator';
 
 if (isMainThread) {
     throw new Error('Cannot start worker in main thread');
@@ -20,10 +21,11 @@ let resolvedCounter = 0;
 let numResolved = 0;
 const resolvedImports: string[] = [];
 
-const setText = () => {
+const setText = (text?: string) => {
     parentPort?.postMessage({
         type: 'updateSpinner',
         args: {
+            text,
             lastClassResolved,
             numResolved,
             resolvedCounter,
@@ -37,12 +39,11 @@ const importChalk = (): Promise<typeof import('chalk').default> =>
 
 const convert = async ({
     classnames,
-    syncSuffix,
-    asyncSuffix,
-    customInspect,
-    targetVersion,
+    fastConvert,
     output,
     classpath,
+    targetVersion,
+    ...otherOpts
 }: Args) => {
     ensureJvm();
 
@@ -64,44 +65,40 @@ const convert = async ({
         );
     }
 
+    const opts = {
+        targetVersion: targetVersion ? parseVersion(targetVersion) : null,
+        ...otherOpts,
+    };
+
     parentPort?.postMessage({
         type: 'startSpinner',
     } as StartSpinner);
 
-    for (const classname of classnames) {
-        const generator = new TypescriptDefinitionGenerator(
-            classname,
-            {
-                syncSuffix,
-                asyncSuffix,
-                customInspect,
-                targetVersion: targetVersion
-                    ? parseVersion(targetVersion)
-                    : null,
-            },
-            (name) => {
-                lastClassResolved = name;
-                resolvedCounter++;
-                setText();
-            },
-            resolvedImports
+    let generator: TypescriptDefinitionGenerator;
+    if (!fastConvert) {
+        generator = new TypescriptDefinitionGenerator(
+            new TsDefinitionGenerator(classnames, opts)
         );
-        const generated = await generator.generate();
-        numResolved += generated.length;
-
-        parentPort?.postMessage({
-            type: 'updateSpinner',
-            args: {
-                lastClassResolved,
-                numResolved,
-                resolvedCounter,
-                resolvedImports,
-                text: 'saving results',
-            },
-        } as UpdateSpinner);
-
-        await TypescriptDefinitionGenerator.save(generated, output);
+    } else {
+        generator = new TypescriptDefinitionGenerator(classnames, opts);
     }
+
+    await generator.createModuleDeclarations((cur) => {
+        if (Array.isArray(cur)) {
+            lastClassResolved = `${cur[0]} and ${cur.length - 1} more`;
+            setText();
+            resolvedCounter += cur.length;
+            numResolved += cur.length;
+        } else {
+            lastClassResolved = cur as string;
+            setText();
+            resolvedCounter++;
+            numResolved++;
+        }
+    });
+
+    setText('Saving results');
+    await generator.save(output);
 
     parentPort?.postMessage({
         type: 'done',

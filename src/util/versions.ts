@@ -1,5 +1,6 @@
 import { lt } from 'semver';
-import { GeneratorOpts, TargetVersion } from './options';
+import { defaultGeneratorOpts, GeneratorOpts, TargetVersion } from './options';
+import { mergeObjects } from './util';
 
 export const javaBridgeVersion = require('java-bridge/package.json').version;
 
@@ -38,4 +39,11 @@ export const checkOptionsForVersion = (opts: GeneratorOpts) => {
             ]);
             break;
     }
+};
+
+export const checkAndMergeOptions = (
+    opts: GeneratorOpts
+): Required<GeneratorOpts> => {
+    checkOptionsForVersion(opts);
+    return mergeObjects(opts, defaultGeneratorOpts);
 };

@@ -2,3 +2,7 @@
 /dist/
 node_modules/
 testResults.xml
+/out/
+/test.js
+/test.ts
+/docs/

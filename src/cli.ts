@@ -44,6 +44,12 @@ const builder: yargs.BuilderCallback<{}, Args> = (command) => {
         .option('targetVersion', {
             type: 'string',
             describe: 'The version of java-bridge to target',
+        })
+        .option('fastConvert', {
+            type: 'boolean',
+            default: true,
+            describe:
+                'Use the faster converter if available (requires Java 16+)',
         });
 };
 
@@ -136,7 +142,6 @@ const handler: YargsHandler<Args> = async (args) => {
                     spinner?.fail('Failed to convert classes');
                     console.error(msg.error);
                     process.exit(1);
-                    break;
                 }
             }
         });
