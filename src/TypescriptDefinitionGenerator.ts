@@ -16,7 +16,7 @@ import { ConvertCallback, ModuleDeclaration } from './types';
  * {@link TsDefinitionGenerator} instances. A valid instance can either
  * be manually passed to the constructor or will be chosen based on
  * the current java version, as {@link JavaDefinitionGenerator}
- * requires Java 16 or higher.
+ * requires Java 11 or higher.
  *
  * ## Example
  * ```ts
@@ -114,7 +114,7 @@ export default class TypescriptDefinitionGenerator
      * Get a {@link DefinitionGeneratorIf} instance, which matches the
      * current system properties. Will return an instance of
      * {@link JavaDefinitionGenerator} if the version of the currently
-     * used JVM is greater than or equal to 16, a {@link TsDefinitionGenerator}
+     * used JVM is greater than or equal to 11, a {@link TsDefinitionGenerator}
      * instance will be returned otherwise.
      *
      * This does not guarantee the returned instance will actually work,
@@ -138,7 +138,7 @@ export default class TypescriptDefinitionGenerator
     ): DefinitionGeneratorIf {
         const version = Number(getJavaVersionSync().split('.')[0]);
 
-        if (version >= 16) {
+        if (version >= 11) {
             return new JavaDefinitionGenerator(
                 classnames,
                 opts,

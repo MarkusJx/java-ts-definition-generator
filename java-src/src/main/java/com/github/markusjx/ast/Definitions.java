@@ -10,11 +10,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Definitions implements JsonConvertible {
     public final String[] root;
-    public final Class[] classes;
+    public final ClassDeclaration[] classes;
 
     public static Definitions createSyntaxTree(String... name
     ) throws ClassNotFoundException {
@@ -23,16 +24,16 @@ public class Definitions implements JsonConvertible {
 
     public static Definitions createSyntaxTree(String[] name,
                                                String[] alreadyResolvedClasses,
-                                               Either<Consumer<String>, Consumer<Class>> consumer
+                                               Either<Consumer<String>, Consumer<ClassDeclaration>> consumer
     ) throws ClassNotFoundException {
-        var res = new ArrayList<Class>();
+        var res = new ArrayList<ClassDeclaration>();
         var queue = new LinkedBlockingQueue<>(Arrays.asList(name));
         var resolvedClasses = new HashSet<>(Arrays.asList(alreadyResolvedClasses));
 
         var cur = queue.poll();
         while (cur != null) {
             resolvedClasses.add(cur);
-            var resolved = Class.readClass(cur);
+            var resolved = ClassDeclaration.readClass(cur);
 
             if (consumer != null) {
                 consumer.acceptLeftIfPresent(c -> c.accept(resolved.toJson()));
@@ -42,11 +43,11 @@ public class Definitions implements JsonConvertible {
             queue.addAll(Arrays.stream(resolved.imports)
                                .filter(s -> !resolvedClasses.contains(
                                        s) && !queue.contains(s))
-                               .toList());
+                               .collect(Collectors.toList()));
             res.add(resolved);
             cur = queue.poll();
         }
 
-        return new Definitions(name, res.toArray(Class[]::new));
+        return new Definitions(name, res.toArray(ClassDeclaration[]::new));
     }
 }

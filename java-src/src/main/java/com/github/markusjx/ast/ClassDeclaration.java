@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class Class implements JsonConvertible {
+public class ClassDeclaration implements JsonConvertible {
     public final String name;
     public final String simpleName;
     public final boolean isInterface;
@@ -18,9 +18,10 @@ public class Class implements JsonConvertible {
     public final ClassConstructor[] constructors;
     public final String[] imports;
 
-    public Class(String name, String simpleName, boolean isInterface,
-                 boolean isAbstractOrInterface, Map<String, ClassMethod[]> methods,
-                 ClassField[] fields, ClassConstructor[] constructors
+    public ClassDeclaration(String name, String simpleName, boolean isInterface,
+                            boolean isAbstractOrInterface,
+                            Map<String, ClassMethod[]> methods,
+                            ClassField[] fields, ClassConstructor[] constructors
     ) {
         this.name = name;
         this.simpleName = simpleName;
@@ -32,18 +33,18 @@ public class Class implements JsonConvertible {
         this.imports = this.calculateImports();
     }
 
-    public static Class readClass(String name) throws ClassNotFoundException {
-        var cls = java.lang.Class.forName(name);
-        var simpleName = name.substring(name.lastIndexOf('.') + 1);
+    public static ClassDeclaration readClass(String name) throws ClassNotFoundException {
+        Class<?> cls = Class.forName(name);
+        String simpleName = name.substring(name.lastIndexOf('.') + 1);
 
-        var isAbstractOrInterface = cls.isInterface() || Modifier.isAbstract(
+        boolean isAbstractOrInterface = cls.isInterface() || Modifier.isAbstract(
                 cls.getModifiers());
-        var isInterface = cls.isInterface();
+        boolean isInterface = cls.isInterface();
 
-        return new Class(name, simpleName, isInterface, isAbstractOrInterface,
+        return new ClassDeclaration(name, simpleName, isInterface, isAbstractOrInterface,
                 Helpers.convertMap(ClassMethod.readMethods(cls), ClassMethod[]::new),
                 ClassField.readFields(cls),
-                ClassConstructor.readConstructors(cls).toArray(ClassConstructor[]::new));
+                ClassConstructor.readConstructors(cls));
     }
 
     private String[] calculateImports() {

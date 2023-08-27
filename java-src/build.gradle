@@ -3,8 +3,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-sourceCompatibility = 16
-targetCompatibility = 16
+sourceCompatibility = 11
+targetCompatibility = 11
 
 group = 'comgithub.markusjx'
 version = '1.0-SNAPSHOT'

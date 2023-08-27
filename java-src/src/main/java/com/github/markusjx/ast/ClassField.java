@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClassField {
@@ -14,15 +15,15 @@ public class ClassField {
     public final String name;
     public final FieldModifier[] modifiers;
 
-    public static ClassField[] readFields(java.lang.Class<?> cls) {
-        var res = new HashMap<String, ClassField>();
+    public static ClassField[] readFields(Class<?> cls) {
+        Map<String, ClassField> res = new HashMap<>();
         for (var field : cls.getFields()) {
             if (!Modifier.isPublic(field.getModifiers())) {
                 continue;
             }
 
-            var type = field.getType().getTypeName();
-            var name = field.getName();
+            String type = field.getType().getTypeName();
+            String name = field.getName();
 
             List<FieldModifier> mods = new ArrayList<>();
             if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {

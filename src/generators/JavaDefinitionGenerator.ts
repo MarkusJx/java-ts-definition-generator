@@ -27,7 +27,7 @@ import { ConvertCallback, ModuleDeclaration } from '../types';
  *
  * If a method from this class is called when the java library
  * is not available, an error will be thrown. The java library
- * may not be available if the java version is lower than 16
+ * may not be available if the java version is lower than 11
  * or if the library could not be found.
  *
  * The library is loaded from the file `ASTGenerator.jar` in the

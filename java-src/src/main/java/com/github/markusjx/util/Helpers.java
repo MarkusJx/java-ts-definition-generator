@@ -7,25 +7,42 @@ import java.util.function.IntFunction;
 
 public abstract class Helpers {
     public static String primitiveToClassType(String type) {
-        return switch (type) {
-            case "boolean" -> "java.lang.Boolean";
-            case "byte" -> "java.lang.Byte";
-            case "char" -> "java.lang.Character";
-            case "short" -> "java.lang.Short";
-            case "int" -> "java.lang.Integer";
-            case "long" -> "java.lang.Long";
-            case "float" -> "java.lang.Float";
-            case "double" -> "java.lang.Double";
-            default -> type;
-        };
+        switch (type) {
+            case "boolean":
+                return "java.lang.Boolean";
+            case "byte":
+                return "java.lang.Byte";
+            case "char":
+                return "java.lang.Character";
+            case "short":
+                return "java.lang.Short";
+            case "int":
+                return "java.lang.Integer";
+            case "long":
+                return "java.lang.Long";
+            case "float":
+                return "java.lang.Float";
+            case "double":
+                return "java.lang.Double";
+            default:
+                return type;
+        }
     }
 
     public static boolean nonPrimitive(String type) {
-        return switch (type) {
-            case "boolean", "byte", "char", "short", "int", "long", "float", "double" ->
-                    false;
-            default -> true;
-        };
+        switch (type) {
+            case "boolean":
+            case "byte":
+            case "char":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "double":
+                return false;
+            default:
+                return true;
+        }
     }
 
     public static <T> Map<String, T[]> convertMap(Map<String, List<T>> map,
