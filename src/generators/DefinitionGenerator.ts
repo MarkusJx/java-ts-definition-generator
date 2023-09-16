@@ -28,7 +28,7 @@ export interface DefinitionGeneratorIf {
      * } from 'java-ts-definition-generator';
      *
      * const generator = new TsDefinitionGenerator('java.lang.String');
-     * const definitions = await generator.generate();
+     * const definitions = await generator.createModuleDeclarations();
      *
      * await TypescriptDefinitionGenerator.save(definitions, './project');
      * ```

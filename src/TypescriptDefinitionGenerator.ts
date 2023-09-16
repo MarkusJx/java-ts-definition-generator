@@ -24,7 +24,7 @@ import { ConvertCallback, ModuleDeclaration } from './types';
  *
  * const generator = new TypescriptDefinitionGenerator('java.lang.String');
  * // Generate the typescript definitions
- * await generator.generate();
+ * await generator.createModuleDeclarations();
  *
  * // Save the definitions to a directory
  * await generator.save('./project');
