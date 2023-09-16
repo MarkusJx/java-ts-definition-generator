@@ -33,9 +33,9 @@ Options:
 
 ### Notes
 
-- The classpath argument can be supplied multiple times to add multiple jars to the classpath
-- Multiple class names can be supplied to generate definitions for multiple classes
-- The generated typescript files will automatically import all classes once the module is loaded.
+-   The classpath argument can be supplied multiple times to add multiple jars to the classpath
+-   Multiple class names can be supplied to generate definitions for multiple classes
+-   The generated typescript files will automatically import all classes once the module is loaded.
 
 ### Examples
 
@@ -80,8 +80,8 @@ java-ts-gen ./project java.lang.String java.util.ArrayList
 import { TypescriptDefinitionGenerator } from 'java-ts-definition-generator';
 
 const generator = new TypescriptDefinitionGenerator([
-  'java.lang.String',
-  'java.util.List',
+    'java.lang.String',
+    'java.util.List',
 ]);
 // Generate the typescript definitions
 await generator.createModuleDeclarations();
@@ -94,10 +94,10 @@ await TypescriptDefinitionGenerator.save('./project');
 
 The java declaration tree can be generated using two generators:
 
-- `JavaDefinitionGenerator`: This generator is the fastest, as it is written in Java.
-Requires Java 11 or higher.
-- `TsDefinitionGenerator`: This one is slower than the `JavaDefinitionGenerator` as it
-is written in Typescript, but it works with any Java version.
+-   `JavaDefinitionGenerator`: This generator is the fastest, as it is written in Java.
+    Requires Java 11 or higher.
+-   `TsDefinitionGenerator`: This one is slower than the `JavaDefinitionGenerator` as it
+    is written in Typescript, but it works with any Java version.
 
 The best generator is automatically picked when instantiating the `TypescriptDefinitionGenerator`
 class. If you still want to choose the generator yourself, you can pass an instance of
