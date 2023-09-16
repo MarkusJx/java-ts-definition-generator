@@ -15,7 +15,7 @@ npm install -g java-ts-definition-generator java-bridge
 
 ## Command line usage
 
-```
+```text
 java-ts-gen <output> <classnames..>
 
 Positionals:
@@ -51,7 +51,7 @@ This will create a directory called `java` containing the definitions for the `j
 dependencies all inside subdirectories. The `java.lang.String` class will be saved to `./project/java/lang/String.ts`.
 Thus, the folder structure of `project` will look something like this:
 
-```
+```text
 .
 ├── ...
 ├── java
@@ -79,30 +79,27 @@ java-ts-gen ./project java.lang.String java.util.ArrayList
 ```ts
 import { TypescriptDefinitionGenerator } from 'java-ts-definition-generator';
 
-const generator = new TypescriptDefinitionGenerator('java.lang.String');
-// Generate the typescript definitions
-const definitions = await generator.generate();
-
-// Save the definitions to a directory
-await TypescriptDefinitionGenerator.save(definitions, './project');
-```
-
-### Generate definitions for multiple classes
-
-```ts
-const generator = new TypescriptBulkDefinitionGenerator();
-
-// Generate definitions for the provided modules
-await generator.generate([
+const generator = new TypescriptDefinitionGenerator([
     'java.lang.String',
     'java.util.List',
-    'java.util.Map',
-    'java.io.FileOutputStream',
-    'java.io.FileInputStream',
-    'java.io.File',
-    'java.lang.System',
 ]);
+// Generate the typescript definitions
+await generator.createModuleDeclarations();
 
 // Save the definitions to a directory
-await generator.save('javaDefinitions');
+await TypescriptDefinitionGenerator.save('./project');
 ```
+
+### Available generators
+
+The java declaration tree can be generated using two generators:
+
+-   `JavaDefinitionGenerator`: This generator is the fastest, as it is written in Java.
+    Requires Java 11 or higher.
+-   `TsDefinitionGenerator`: This one is slower than the `JavaDefinitionGenerator` as it
+    is written in Typescript, but it works with any Java version.
+
+The best generator is automatically picked when instantiating the `TypescriptDefinitionGenerator`
+class. If you still want to choose the generator yourself, you can pass an instance of
+the `JavaDefinitionGenerator` or `TsDefinitionGenerator` into the constructor of the
+`TypescriptDefinitionGenerator`.
