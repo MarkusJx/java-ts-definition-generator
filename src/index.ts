@@ -8,6 +8,7 @@ export * from './generators/DefinitionGenerator';
 export * from './TypescriptDefinitionGenerator';
 export * from './util/options';
 export * from './types';
+export * from './util/jarScraper';
 export default TypescriptDefinitionGenerator;
 
 export * from './ast/types';

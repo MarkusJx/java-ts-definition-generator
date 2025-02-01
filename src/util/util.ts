@@ -6,7 +6,7 @@ export const deepEquals = <T extends {}>(a: T, b: T): boolean => {
             typeof b[key] === 'object' &&
             !!b[key]
         ) {
-            return deepEquals(a[key], b[key]);
+            return deepEquals(a[key] as object, b[key] as object);
         } else {
             return a[key] === b[key];
         }

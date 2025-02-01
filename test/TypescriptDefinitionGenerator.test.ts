@@ -27,7 +27,7 @@ function checkTypescriptSyntax(baseDirectory: string): Diagnostics[] {
         strict: true,
         target: ts.ScriptTarget.ES2022,
         module: ts.ModuleKind.CommonJS,
-        moduleResolution: ts.ModuleResolutionKind.Node16,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
         allowJs: true,
         noImplicitAny: true,
         noImplicitReturns: true,

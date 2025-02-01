@@ -11,6 +11,7 @@ import {
 import java, { ensureJvm, getJavaInstance } from 'java-bridge';
 import TypescriptDefinitionGenerator from '../TypescriptDefinitionGenerator';
 import { TsDefinitionGenerator } from '../generators/TsDefinitionGenerator';
+import { findAllClassesMatching } from '../util/jarScraper';
 
 if (isMainThread) {
     throw new Error('Cannot start worker in main thread');
@@ -74,6 +75,17 @@ const convert = async ({
         type: 'startSpinner',
     } as StartSpinner);
 
+    if (classnames.some((c) => c.includes('*'))) {
+        const globClassNames = classnames.filter((c) => c.includes('*'));
+        classnames = classnames.filter((c) => !c.includes('*'));
+
+        const matchingClasses = await findAllClassesMatching(
+            loadedJars,
+            globClassNames
+        );
+        classnames.push(...matchingClasses);
+    }
+
     let generator: TypescriptDefinitionGenerator;
     if (!fastConvert) {
         generator = new TypescriptDefinitionGenerator(
@@ -108,12 +120,11 @@ const convert = async ({
 parentPort?.on('message', (msg: CommMessage) => {
     switch (msg.type) {
         case 'start':
-            convert(msg.args).catch(
-                (error) =>
-                    parentPort?.postMessage({
-                        type: 'error',
-                        error,
-                    } as ErrorMessage)
+            convert(msg.args).catch((error) =>
+                parentPort?.postMessage({
+                    type: 'error',
+                    error,
+                } as ErrorMessage)
             );
             break;
     }
