@@ -33,9 +33,10 @@ Options:
 
 ### Notes
 
--   The classpath argument can be supplied multiple times to add multiple jars to the classpath
--   Multiple class names can be supplied to generate definitions for multiple classes
--   The generated typescript files will automatically import all classes once the module is loaded.
+- The classpath argument can be supplied multiple times to add multiple jars to the classpath
+- Multiple class names can be supplied to generate definitions for multiple classes
+- The generated typescript files will automatically import all classes once the module is loaded.
+- If a glob pattern, e.g. `com.github.*`, is supplied for the class names, all supplied jars will be searched against that glob pattern. Definitions for all matching classes will be generated. This does not work for classes supplied by the JVM.
 
 ### Examples
 
@@ -74,6 +75,14 @@ and save them to `./project`:
 java-ts-gen ./project java.lang.String java.util.ArrayList
 ```
 
+#### Generate definitions for all classes inside a JAR
+
+Generate definitions for all classes inside the package `com.github` and save them to `./project`:
+
+```bash
+java-ts-gen --cp /path/to/my.jar ./project com.github.*
+```
+
 ## Library usage
 
 ```ts
@@ -94,10 +103,10 @@ await TypescriptDefinitionGenerator.save('./project');
 
 The java declaration tree can be generated using two generators:
 
--   `JavaDefinitionGenerator`: This generator is the fastest, as it is written in Java.
-    Requires Java 11 or higher.
--   `TsDefinitionGenerator`: This one is slower than the `JavaDefinitionGenerator` as it
-    is written in Typescript, but it works with any Java version.
+- `JavaDefinitionGenerator`: This generator is the fastest, as it is written in Java.
+  Requires Java 11 or higher.
+- `TsDefinitionGenerator`: This one is slower than the `JavaDefinitionGenerator` as it
+  is written in Typescript, but it works with any Java version.
 
 The best generator is automatically picked when instantiating the `TypescriptDefinitionGenerator`
 class. If you still want to choose the generator yourself, you can pass an instance of
