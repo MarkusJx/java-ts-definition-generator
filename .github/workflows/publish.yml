@@ -47,7 +47,7 @@ jobs:
               uses: ncipollo/release-action@v1
               if: github.event.inputs.dry-run != 'true'
               with:
-                generateReleaseNotes: true
-                draft: true
-                tag: v${{ env.version }}
-                token: ${{ secrets.GITHUB_TOKEN }}
+                  generateReleaseNotes: true
+                  draft: true
+                  tag: v${{ env.version }}
+                  token: ${{ secrets.GITHUB_TOKEN }}
