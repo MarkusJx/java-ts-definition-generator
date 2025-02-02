@@ -50,4 +50,4 @@ jobs:
                   generateReleaseNotes: true
                   draft: true
                   tag: v${{ env.version }}
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.NPM_TOKEN }}
