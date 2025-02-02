@@ -21,7 +21,7 @@
         "dist/**/*"
     ],
     "bin": {
-        "java-ts-gen": "./dist/java-ts-gen.js"
+        "java-ts-gen": "dist/java-ts-gen.js"
     },
     "dependencies": {
         "chalk": "^5.2.0",
