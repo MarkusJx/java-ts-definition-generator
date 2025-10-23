@@ -20,7 +20,7 @@ export const mergeObjects = <T extends {}>(
     return (Object.keys(defaultObj) as (keyof T)[])
         .map((o) => ({
             name: o,
-            value: !!obj[o] ? obj[o] : defaultObj[o],
+            value: obj[o] ?? defaultObj[o],
         }))
         .reduce(
             (prev, cur) => ({
