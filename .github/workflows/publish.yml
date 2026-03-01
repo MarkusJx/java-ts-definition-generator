@@ -9,15 +9,18 @@ on:
                 required: false
                 default: false
 
+env:
+  DRY_RUN: ${{ (github.event.inputs.dry-run == 'true' && '--dry-run') || '' }}
+
 jobs:
     build:
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Setup Node.js environment
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: 22.x
             - name: Install Dependencies
@@ -25,11 +28,7 @@ jobs:
             - name: Build
               run: npm run build
             - name: NPM Publish
-              uses: JS-DevTools/npm-publish@66e0e1d9494ba904d4d608ae77fc5f4fe9bcc038
-              with:
-                  access: public
-                  token: ${{ secrets.NPM_TOKEN }}
-                  dry-run: ${{ github.event.inputs.dry-run == 'true' }}
+              run: npm publish --access public ${{env.DRY_RUN}}
 
     draft-release:
         needs: [build]
@@ -44,10 +43,13 @@ jobs:
               run: echo "version=$(node -p 'require(`./package.json`).version')" >> $GITHUB_ENV
               shell: bash
             - name: Create Release
-              uses: ncipollo/release-action@v1
-              if: github.event.inputs.dry-run != 'true'
+              id: create_release
+              uses: softprops/action-gh-release@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  generateReleaseNotes: true
+                  tag_name: v${{ env.version }}
+                  name: Release v${{ env.version }}
+                  generate_release_notes: true
                   draft: true
-                  tag: v${{ env.version }}
-                  token: ${{ secrets.NPM_TOKEN }}
+                  prerelease: false
