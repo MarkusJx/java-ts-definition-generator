@@ -10,7 +10,7 @@ on:
                 default: false
 
 env:
-  DRY_RUN: ${{ (github.event.inputs.dry-run == 'true' && '--dry-run') || '' }}
+    DRY_RUN: ${{ (github.event.inputs.dry-run == 'true' && '--dry-run') || '' }}
 
 jobs:
     build:
