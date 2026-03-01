@@ -29,7 +29,7 @@
         "ora": "^9.3.0",
         "semver": "^7.7.4",
         "typescript": "^5.9.3",
-        "yargs": "^18.0.0"
+        "yargs": "^17.7.2"
     },
     "devDependencies": {
         "@types/chai": "^5.2.3",
