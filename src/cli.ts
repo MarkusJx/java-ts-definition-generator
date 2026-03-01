@@ -1,7 +1,7 @@
 import yargs from 'yargs';
 import { performance } from 'perf_hooks';
 import path from 'path';
-import { version } from '../package.json';
+import { name, version } from '../package.json';
 import type { Ora } from 'ora';
 import { javaBridgeVersion } from './util/versions';
 import { Worker } from 'worker_threads';
@@ -64,7 +64,7 @@ const handler: YargsHandler<Args> = async (args) => {
         const ora = await importOra();
 
         console.log(
-            `Starting ${chalk.cyanBright('java-bridge')} ${chalk.greenBright(
+            `Starting ${chalk.cyanBright(name)} ${chalk.greenBright(
                 'v' + version
             )} Java definition generator`
         );
