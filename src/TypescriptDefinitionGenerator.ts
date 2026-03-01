@@ -30,9 +30,7 @@ import { ConvertCallback, ModuleDeclaration } from './types';
  * await generator.save('./project');
  * ```
  */
-export default class TypescriptDefinitionGenerator
-    implements DefinitionGeneratorIf
-{
+export default class TypescriptDefinitionGenerator implements DefinitionGeneratorIf {
     /**
      * The {@link DefinitionGeneratorIf} instance,
      * which is used to generate the typescript definitions.
