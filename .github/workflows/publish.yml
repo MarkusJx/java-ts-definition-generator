@@ -37,7 +37,7 @@ jobs:
         permissions: write-all
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Get version
               id: version
               run: echo "version=$(node -p 'require(`./package.json`).version')" >> $GITHUB_ENV

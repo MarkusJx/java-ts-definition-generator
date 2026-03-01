@@ -1,6 +1,6 @@
 {
     "name": "java-ts-definition-generator",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "The typescript definition generator for the java-bridge package",
     "main": "dist/index.prod.min.js",
     "types": "dist/src/index.d.ts",
